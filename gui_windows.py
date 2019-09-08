@@ -146,7 +146,8 @@ class TextWindow(tk.Tk):
                                                filetypes=(("txt files",
                                                            "*.txt"),
                                                           ("all files",
-                                                           "*.*")))
+                                                           "*.*")),
+                                               title="Save file")
 
         with open(file, 'w') as f:
             f.write(data)
@@ -157,7 +158,17 @@ class TextWindow(tk.Tk):
         Open the text in the main grid.
         """
 
-        file = tk.filedialog.askopenfilename()
+        file = tk.filedialog.askopenfilename(filetypes=(("txt files",
+                                                           "*.txt"),
+                                                          ("all files",
+                                                           "*.*")),
+                                               title="Open file")
+
+        with open(file, 'r') as f:
+            data = f.read()
+            print(data)
+            self.text.delete("1.0", tk.END)
+            self.text.insert(tk.INSERT, data)
 
 
     @log.log_function
@@ -173,7 +184,7 @@ class TextWindow(tk.Tk):
         self.file_menu = tk.Menu(self.menu)
 
         self.file_menu.add_command(label="New")
-        self.file_menu.add_command(label="Open")
+        self.file_menu.add_command(label="Open", command=self.open_file)
         self.file_menu.add_command(label="Save", command=self.save_file)
         self.file_menu.add_separator()
         self.file_menu.add_command(label="Quit", command=self.quit)
