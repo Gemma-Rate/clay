@@ -3,6 +3,7 @@ GUI windows class
 """
 
 import tkinter as tk
+import tkinter.filedialog
 import log
 
 class TextWindow(tk.Tk):
@@ -43,7 +44,7 @@ class TextWindow(tk.Tk):
         # Set grid.
 
         self.frame = tk.Frame(self.master, height=self.master_height,
-                              width=self.master_width, pady=35)
+                              width=self.master_width, pady=5)
         #Make a frame around the text box.
         self.frame.grid(row=0, sticky="ew")
         self.text = tk.Text(self.frame, height=self.master_height-10,
@@ -122,7 +123,7 @@ class TextWindow(tk.Tk):
                 self.colourise_text(w, 'black', 'snow', 'general')
                 self.insert_spaces()
 
-
+    @log.log_function
     def scrollbar(self):
         """
         Add a scrollbar to the word window.
@@ -134,5 +135,59 @@ class TextWindow(tk.Tk):
 
         self.text.config(yscrollcommand=scrollbar.set)
         scrollbar.config(command=self.text.yview)
+
+    @log.log_function
+    def save_file(self):
+        """
+        Save the text in the main grid.
+        """
+        data = self.text.get("1.0", 'end-1c')
+        file = tk.filedialog.asksaveasfilename(defaultextension='.txt',
+                                               filetypes=(("txt files",
+                                                           "*.txt"),
+                                                          ("all files",
+                                                           "*.*")))
+
+        with open(file, 'w') as f:
+            f.write(data)
+
+    @log.log_function
+    def open_file(self):
+        """
+        Open the text in the main grid.
+        """
+
+        file = tk.filedialog.askopenfilename()
+
+
+    @log.log_function
+    def menu(self):
+        """
+        Add top bar menu ribbon.
+        """
+
+        self.menu = tk.Menu(self.frame)
+        # Main menu ribbon.
+
+        """Menu for files:"""
+        self.file_menu = tk.Menu(self.menu)
+
+        self.file_menu.add_command(label="New")
+        self.file_menu.add_command(label="Open")
+        self.file_menu.add_command(label="Save", command=self.save_file)
+        self.file_menu.add_separator()
+        self.file_menu.add_command(label="Quit", command=self.quit)
+
+        self.menu.add_cascade(label="File", menu=self.file_menu)
+
+        self.config(menu=self.menu)
+
+    @log.log_function
+    def auto_update(self):
+        """
+        Auto update the main word grid.
+        """
+        pass
+
 
 
