@@ -13,7 +13,7 @@ class MyTestCase(unittest.TestCase):
         # Start logging.
 
         text = 'I was about to go shopping, but it was raining. So I decided to stay at home instead.'
-        app = gu.TextWindow(None, text)
+        app = gu.MainWindow(None, text)
         app.title('Prose analysis')
         app.grid_config()
 
@@ -27,7 +27,7 @@ class MyTestCase(unittest.TestCase):
         # Start logging.
 
         text = 'I was about to go shopping, but it was raining. So I decided to stay at home instead.'
-        app = gu.TextWindow(None, text)
+        app = gu.MainWindow(None, text)
         app.title('Prose analysis')
         app.grid_config()
 
