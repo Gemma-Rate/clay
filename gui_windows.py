@@ -31,6 +31,9 @@ class MainWindow(tk.Tk):
         # Raw entry text (not modified).
         self.tag_colors = {''}
 
+        self.current_tab = None
+        # Empty attributes to fill later.
+
     @log.log_function
     def grid_config(self):
         """
@@ -50,12 +53,19 @@ class MainWindow(tk.Tk):
 
         # Make notebook for tabs:
         self.parent_tabs = tk.ttk.Notebook(self.frame)
+        self.parent_tabs.bind('<<NotebookTabChanged>>', self.select_tab_type)
+        # Bind tab frame so that changing notebook tab triggers tab text
+        # selection.
 
         # Add tab:
-        tab1 = self.add_tab()
+        tab1 = self.new_tab('Doc 1')
+        print(type(tab1))
 
         # Make a text box with this tab:
         tab1.add_text_box()
+
+        tab2 = self.new_tab('Doc 2')
+        tab2.add_text_box()
 
         self.update()
         # Update based on events.
@@ -112,17 +122,13 @@ class MainWindow(tk.Tk):
 
         self.menu = tk.Menu(self.frame)
         # Main menu ribbon.
-        tab_id = self.parent_tabs.select()
-        current_tab = self.parent_tabs[str(tab_id)]
-        print(current_tab)
-        # Get current tab (for open/closing functions).
 
         """Menu for files:"""
         self.file_menu = tk.Menu(self.menu)
 
-        self.file_menu.add_command(label="New", command=self.new_file(current_tab))
-        self.file_menu.add_command(label="Open", command=self.open_file(current_tab))
-        self.file_menu.add_command(label="Save", command=self.save_file(current_tab))
+        self.file_menu.add_command(label="New", command=lambda : self.new_file(self.current_tab))
+        self.file_menu.add_command(label="Open", command=lambda : self.open_file(self.current_tab))
+        self.file_menu.add_command(label="Save", command=lambda : self.save_file(self.current_tab))
         self.file_menu.add_separator()
         self.file_menu.add_command(label="Quit", command=self.quit)
 
@@ -132,15 +138,15 @@ class MainWindow(tk.Tk):
 
 
     @log.log_function
-    def add_tab(self):
+    def new_tab(self, tab_name):
         """
         Add a new tab.
         """
 
         tab_w_box = tb.TabTextBox(self.parent_tabs, self.raw, self.master_height,
-                                  self.master_width)
+                                  self.master_width, tab_name)
         # Internal container class.
-        self.parent_tabs.add(tab_w_box.tk_tab, text='tab1')
+        self.parent_tabs.add(tab_w_box, text=tab_w_box.tab_name)
         self.parent_tabs.grid(sticky='EW')
 
         return tab_w_box
@@ -151,6 +157,16 @@ class MainWindow(tk.Tk):
         Auto update the main word grid.
         """
         pass
+
+    @log.log_function
+    def select_tab_type(self, event):
+        """
+        Select tab class based on currently selected tab.
+        """
+        current_tab_name = self.parent_tabs.select()
+        self.current_tab = self.parent_tabs.nametowidget(current_tab_name)
+        # Get current tab (for open/closing functions).
+
 
 
 

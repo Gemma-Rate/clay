@@ -23,26 +23,26 @@ class TabTextBox(tk.Frame):
 
     """
 
-    def __init__(self, parent, text, xdim, ydim):
+    def __init__(self, parent, text, xdim, ydim, tab_name):
         tk.Frame.__init__(self, parent)
         self.parent = parent
         self.text = text
         self.raw = text
         # Raw entry text (not modified).
 
-        self.tk_tab = tk.Frame(self.parent)
         self.tag_colors = {''}
         self.xdim = xdim
         # Full x dimension of the tab widget area.
         self.ydim = ydim
         # Full y dimension of the tab widget area.
+        self.tab_name = tab_name
 
     @log.log_function
     def add_text_box(self):
         """
         Add a new text box to the tab.
         """
-        self.text = tk.Text(self.tk_tab, height=self.xdim - 10,
+        self.text = tk.Text(self, height=self.xdim - 10,
                             width=self.ydim - 10, wrap='word')
         # Make a text object.
         self.text.grid(column=0, row=0, sticky='EW')
@@ -126,7 +126,7 @@ class TabTextBox(tk.Frame):
         Add a scrollbar to the word window.
         """
 
-        scrollbar = tk.Scrollbar(self.tk_tab, orient=tk.VERTICAL)
+        scrollbar = tk.Scrollbar(self, orient=tk.VERTICAL)
         scrollbar.grid(column=1, row=0, sticky='N'+'S'+'W')
         # Add scrollbar on the right.
 
