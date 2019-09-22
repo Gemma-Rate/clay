@@ -32,6 +32,7 @@ class MainWindow(tk.Tk):
         self.tag_colors = {''}
 
         self.current_tab = None
+        self.tab_no = None
         # Empty attributes to fill later.
 
     @log.log_function
@@ -51,21 +52,23 @@ class MainWindow(tk.Tk):
         #Make a frame:
         self.frame.grid(row=0, sticky="ew")
 
+        # Paned window split:
+        self.panes = tk.PanedWindow(self.master, orient ='horizontal')
+        self.panes.grid(row=0, sticky="ew")
+
         # Make notebook for tabs:
-        self.parent_tabs = tk.ttk.Notebook(self.frame)
+
+        self.parent_tabs = tk.ttk.Notebook(self.panes)
         self.parent_tabs.bind('<<NotebookTabChanged>>', self.select_tab_type)
         # Bind tab frame so that changing notebook tab triggers tab text
         # selection.
+        self.panes.add(self.parent_tabs)
 
         # Add tab:
-        tab1 = self.new_tab('Doc 1')
-        print(type(tab1))
-
+        self.new_tab()
         # Make a text box with this tab:
-        tab1.add_text_box()
 
-        tab2 = self.new_tab('Doc 2')
-        tab2.add_text_box()
+        self.add_tab_button()
 
         self.update()
         # Update based on events.
@@ -86,6 +89,9 @@ class MainWindow(tk.Tk):
         with open(file, 'w') as f:
             f.write(data)
 
+        self.parent_tabs.tab(tab, text=file)
+        # Change tab name to saved file name.
+
     @log.log_function
     def open_file(self, tab):
         """
@@ -105,6 +111,9 @@ class MainWindow(tk.Tk):
             tab.text.insert(tk.INSERT, data)
             # Insert the text from the file.
 
+        self.parent_tabs.tab(tab, text=file)
+        # Change tab name to loaded file name.
+
     @log.log_function
     def new_file(self, tab):
         """
@@ -113,6 +122,10 @@ class MainWindow(tk.Tk):
         """
         self.save_file(tab)
         tab.text.delete("1.0", tk.END)
+
+        default_tab_name = 'Doc ' + str(len(self.parent_tabs.tabs()))
+        self.parent_tabs.tab(tab, text=default_tab_name)
+        # Change tab label back to default.
 
     @log.log_function
     def menu(self):
@@ -138,16 +151,18 @@ class MainWindow(tk.Tk):
 
 
     @log.log_function
-    def new_tab(self, tab_name):
+    def new_tab(self, event=None):
         """
-        Add a new tab.
+        Add a new text box tab.
         """
+        default_tab_name = 'Doc '+str(len(self.parent_tabs.tabs()))
 
         tab_w_box = tb.TabTextBox(self.parent_tabs, self.raw, self.master_height,
-                                  self.master_width, tab_name)
+                                  self.master_width, default_tab_name)
         # Internal container class.
-        self.parent_tabs.add(tab_w_box, text=tab_w_box.tab_name)
         self.parent_tabs.grid(sticky='EW')
+        self.parent_tabs.add(tab_w_box, text=tab_w_box.tab_name)
+        tab_w_box.add_text_box()
 
         return tab_w_box
 
@@ -167,6 +182,14 @@ class MainWindow(tk.Tk):
         self.current_tab = self.parent_tabs.nametowidget(current_tab_name)
         # Get current tab (for open/closing functions).
 
-
-
+    @log.log_function
+    def add_tab_button(self):
+        """
+        Button for generating new tabs.
+        """
+        tab_host = tk.ttk.Button(self.panes, text='+')
+        tab_host.grid(row=0, column=1)
+        # Add a button.
+        tab_host.bind('<Button-1>', self.new_tab)
+        # Create new tab when pressing the new tab button.
 
