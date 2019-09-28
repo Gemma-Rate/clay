@@ -37,13 +37,15 @@ class TabTextBox(tk.Frame):
         # Full y dimension of the tab widget area.
         self.tab_name = tab_name
 
+        # Frame to store things in.
+
     @log.log_function
     def add_text_box(self):
         """
         Add a new text box to the tab.
         """
-        self.text = tk.Text(self, height=self.xdim - 10,
-                            width=self.ydim - 10, wrap='word')
+        self.text = tk.Text(self, height=self.xdim - 20,
+                            width=self.ydim - 20, wrap='word')
         # Make a text object.
         self.text.grid(column=0, row=0, sticky='EW')
         self.grid_rowconfigure(0, weight=1)
@@ -53,6 +55,15 @@ class TabTextBox(tk.Frame):
         # Add text.
         self.scrollbar()
         # Add the scrollbar.
+
+    @log.log_function
+    def add_cross_to_tab(self):
+        """
+        Add a cross to close the tab...
+        """
+        pass
+
+
 
     @log.log_function
     def colourise_text(self, text, fgcolour, bgcolour, name):
@@ -132,3 +143,11 @@ class TabTextBox(tk.Frame):
 
         self.text.config(yscrollcommand=scrollbar.set)
         scrollbar.config(command=self.text.yview)
+
+
+    @log.log_function
+    def add_exit(self):
+        """
+        Add an exit button to the tab.
+        """
+        pass

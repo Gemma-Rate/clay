@@ -46,29 +46,35 @@ class MainWindow(tk.Tk):
         self.grid()
         # Set grid.
 
-        self.frame = tk.Frame(self.master, height=self.master_height,
+        """Paned window split:"""
+        self.panes = tk.PanedWindow(self.master, orient ='horizontal')
+        self.panes.grid(column=0, row=0, sticky="ew")
+
+        """Make frames:"""
+        self.menu_frame = tk.Frame(self.master, height=self.master_height,
+                              width=self.master_width, pady=5)
+        self.menu_frame.grid(row=0, sticky="ew")
+
+        self.notebook_frame = tk.Frame(self.panes, height=self.master_height,
                               width=self.master_width, pady=5)
 
-        #Make a frame:
-        self.frame.grid(row=0, sticky="ew")
-
-        # Paned window split:
-        self.panes = tk.PanedWindow(self.master, orient ='horizontal')
-        self.panes.grid(row=0, sticky="ew")
-
-        # Make notebook for tabs:
-
-        self.parent_tabs = tk.ttk.Notebook(self.panes)
+        """Make notebook for tabs:"""
+        self.parent_tabs = tk.ttk.Notebook(self.notebook_frame)
         self.parent_tabs.bind('<<NotebookTabChanged>>', self.select_tab_type)
         # Bind tab frame so that changing notebook tab triggers tab text
         # selection.
-        self.panes.add(self.parent_tabs)
-
+        self.parent_tabs.grid(column=0, row=1, sticky="ew")
+        self.panes.add(self.notebook_frame)
         # Add tab:
         self.new_tab()
-        # Make a text box with this tab:
-
+        # Make a text box with this tab.
         self.add_tab_button()
+        # Button to add new tabs.
+
+        self.dummy = tk.Canvas(self.notebook_frame)
+        # Make dummy text box for scrollbar....
+        self.dummy.grid(column=0, row=0)
+        self.dummy.create_window((1, 1), anchor='n')
 
         self.update()
         # Update based on events.
@@ -132,8 +138,7 @@ class MainWindow(tk.Tk):
         """
         Add top bar menu ribbon.
         """
-
-        self.menu = tk.Menu(self.frame)
+        self.menu = tk.Menu(self.menu_frame)
         # Main menu ribbon.
 
         """Menu for files:"""
@@ -146,6 +151,9 @@ class MainWindow(tk.Tk):
         self.file_menu.add_command(label="Quit", command=self.quit)
 
         self.menu.add_cascade(label="File", menu=self.file_menu)
+
+        """Menu for tabs"""
+        self.menu.add_command(label='X', command=self.close_tab)
 
         self.config(menu=self.menu)
 
@@ -163,6 +171,9 @@ class MainWindow(tk.Tk):
         self.parent_tabs.grid(sticky='EW')
         self.parent_tabs.add(tab_w_box, text=tab_w_box.tab_name)
         tab_w_box.add_text_box()
+
+        self.add_tab_scroll()
+        # Implement scrolling if a large number of tabs is opened...
 
         return tab_w_box
 
@@ -187,9 +198,30 @@ class MainWindow(tk.Tk):
         """
         Button for generating new tabs.
         """
-        tab_host = tk.ttk.Button(self.panes, text='+')
-        tab_host.grid(row=0, column=1)
+        tab_host = tk.ttk.Button(self.notebook_frame, text='+')
+        tab_host.grid(column=0, row=1, sticky='NE')
         # Add a button.
         tab_host.bind('<Button-1>', self.new_tab)
         # Create new tab when pressing the new tab button.
 
+    @log.log_function
+    def add_tab_scroll(self):
+        """
+        Add a scroll bar to the parent_tabs notebook if there are too many
+        tabs.
+        """
+        if len(self.parent_tabs.tabs()) >5:
+
+            scrollbar = tk.Scrollbar(self.notebook_frame, orient=tk.HORIZONTAL,
+                                     command=self.dummy.xview)
+            scrollbar.grid(column=0, row=0)
+            # Add scrollbar on the right.
+
+            self.dummy.config(xscrollcommand=scrollbar.set)
+
+    @log.log_function
+    def close_tab(self):
+        """
+        Close selected tab.
+        """
+        self.parent_tabs.forget(self.current_tab)
