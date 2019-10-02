@@ -57,15 +57,6 @@ class TabTextBox(tk.Frame):
         # Add the scrollbar.
 
     @log.log_function
-    def add_cross_to_tab(self):
-        """
-        Add a cross to close the tab...
-        """
-        pass
-
-
-
-    @log.log_function
     def colourise_text(self, text, fgcolour, bgcolour, name):
         """
         Make text a different colour.
@@ -143,11 +134,3 @@ class TabTextBox(tk.Frame):
 
         self.text.config(yscrollcommand=scrollbar.set)
         scrollbar.config(command=self.text.yview)
-
-
-    @log.log_function
-    def add_exit(self):
-        """
-        Add an exit button to the tab.
-        """
-        pass
