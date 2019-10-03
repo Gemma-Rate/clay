@@ -68,6 +68,8 @@ class MainWindow(tk.Tk):
         # Make a text box with this tab.
         self.add_tab_button()
         # Button to add new tabs.
+        self.parent_tabs.enable_traversal()
+        # Allow tab switching via keyboard.
 
         self.update()
         # Update based on events.
@@ -164,7 +166,7 @@ class MainWindow(tk.Tk):
         self.parent_tabs.add(tab_w_box, text=tab_w_box.tab_name)
         tab_w_box.add_text_box()
 
-        #self.add_tab_scroll()
+        self.add_tab_scroll()
         # Implement scrolling if a large number of tabs is opened...
 
         return tab_w_box
@@ -202,12 +204,71 @@ class MainWindow(tk.Tk):
         Add scroll buttons to the parent_tabs notebook if there are too many
         tabs.
         """
-        if len(self.parent_tabs.tabs()) >5:
 
-            #scrollbar = tk.Scrollbar(self.notebook_frame, orient=tk.HORIZONTAL,
-                                    # command=self.dummy.xview)
-            #scrollbar.grid(column=0, row=0)
-            # Add scrollbar on the right.
+        if len(self.parent_tabs.tabs()) >5:
+            scroll_tab_l = tk.ttk.Button(self.panes, text='<')
+            scroll_tab_l.grid(column=0, row=1, sticky='NE')
+            scroll_tab_r = tk.ttk.Button(self.panes, text='>')
+            scroll_tab_r.grid(column=1, row=1, sticky='NE')
+            # Add scroll buttons.
+            scroll_tab_l.bind('<Button-1>', self.scroll_tab_left)
+            scroll_tab_r.bind('<Button-1>', self.scroll_tab_right)
+            # Scroll to left or right tab.
+
+
+    def scroll_tab_left(self, event):
+        """
+        Select tab to the left.
+        """
+        first_tab = self.parent_tabs.tabs()[0]
+        all_tabs = self.parent_tabs.tabs()
+        # Get ID of first and last tabs.
+
+        if self.parent_tabs.index(self.current_tab) != 0:
+            # If we're not at the first tab, scroll left.
+
+            index_now = self.parent_tabs.index(self.current_tab)
+            left_index = index_now-1
+            # Get index of tab to the left.
+            next_left = self.parent_tabs.tabs()[left_index]
+            self.parent_tabs.select(next_left)
+            # Get widget name of tab to the left and switch to it.
+
+            tabs_to_end = index_now+13
+
+            # Hide some tabs:
+            for t in all_tabs[tabs_to_end:]:
+                self.parent_tabs.hide(t)
+            self.parent_tabs.add(all_tabs[left_index-1])
+             # Add tab two to the left.
+
+        else:
+            pass
+
+    def scroll_tab_right(self, event):
+        """
+        Select tab to the right.
+        """
+        all_tabs = self.parent_tabs.tabs()
+        last_tab = self.parent_tabs.tabs()[-1]
+        # Get ID of first and last tabs.
+
+        if self.parent_tabs.index(self.current_tab) != len(all_tabs):
+            # If we're not at the last tab, scroll right.
+
+            index_now = self.parent_tabs.index(self.current_tab)
+            right_index = index_now+1
+            # Get index of tab to the left.
+            next_right = self.parent_tabs.tabs()[right_index]
+            self.parent_tabs.select(next_right)
+            # Get widget name of tab to the left and switch to it.
+
+            tabs_to_end = index_now
+
+            # Hide some tabs:
+            for t in all_tabs[:tabs_to_end]:
+                self.parent_tabs.hide(t)
+        else:
             pass
 
     @log.log_function
