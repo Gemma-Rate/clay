@@ -3,8 +3,7 @@ GUI class for tab objects.
 """
 
 import tkinter as tk
-import tkinter.ttk
-import tkinter.filedialog
+import words_analysis_classes as wd
 import log
 
 class TabTextBox(tk.Frame):
@@ -23,17 +22,17 @@ class TabTextBox(tk.Frame):
 
     """
 
-    def __init__(self, parent, text, xdim, ydim, tab_name):
+    def __init__(self, parent, xdim, ydim, tab_name):
         tk.Frame.__init__(self, parent)
         self.parent = parent
-        self.text = text
-        self.raw = text
+        self.text = None
+        self.raw = None
         # Raw entry text (not modified).
 
         self.tag_colors = {''}
-        self.xdim = xdim
+        self.xdim = xdim - 20
         # Full x dimension of the tab widget area.
-        self.ydim = ydim
+        self.ydim = ydim - 10
         # Full y dimension of the tab widget area.
         self.tab_name = tab_name
 
@@ -44,14 +43,14 @@ class TabTextBox(tk.Frame):
         """
         Add a new text box to the tab.
         """
-        self.text = tk.Text(self, height=self.xdim - 20,
-                            width=self.ydim - 20, wrap='word')
+        self.text = tk.Text(self, height=self.xdim,
+                            width=self.ydim, wrap='word')
         # Make a text object.
         self.text.grid(column=0, row=0, sticky='EW')
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
 
-        self.text.insert(tk.END, self.raw)
+        #self.text.insert(tk.END, self.raw)
         # Add text.
         self.scrollbar()
         # Add the scrollbar.
@@ -95,6 +94,14 @@ class TabTextBox(tk.Frame):
 
         self.text.insert(tk.END, ' ')
 
+    @log.log_function
+    def highlight_word_types(self):
+        """
+        Highlight specific word types.
+        """
+        wc = wd.WordSet(self.raw)
+        wc.label_word_types()
+        self.highlight_words('the', wc)
 
     @log.log_function
     def highlight_words(self, keyword, wc, color='blue'):
@@ -111,7 +118,6 @@ class TabTextBox(tk.Frame):
             Class of all words in the text box.
         color : tuple
             String of containing colour.
-
         """
         # Store indices of punctuation marks to delete extra spaces.
         for i,w in enumerate(wc.token):
@@ -134,3 +140,12 @@ class TabTextBox(tk.Frame):
 
         self.text.config(yscrollcommand=scrollbar.set)
         scrollbar.config(command=self.text.yview)
+
+
+    @log.log_function
+    def capture_text(self):
+        """
+        Capture text entered into the tab text box.
+        """
+        #<Key>
+        pass

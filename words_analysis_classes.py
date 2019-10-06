@@ -39,9 +39,14 @@ class WordSet(object):
         # Keeps in punctuation and upper cases.
         self.processed = kf.word_token(text)
         self.pos = None
+        self.word_colours = {'VB':'blue', 'VBD':'blue', 'VBG':'blue',
+                             'VBN':'blue', 'VBP':'blue', 'VBZ':'blue',
+                             'NN':'red', 'NNS':'red', 'NNP':'red4',
+                             'NNPS':'red4', 'JJ':'green', 'JJR':'green',
+                             'JJS':'green'}
 
 
-    def label_word_types(self, tagger):
+    def label_word_types(self):
         """
         Parameters
         ----------
@@ -52,7 +57,7 @@ class WordSet(object):
         ----------
         """
 
-        pos_text = tagger(self.processed)
+        pos_text = nltk.pos_tag(self.processed)
 
         self.pos = pos_text
 

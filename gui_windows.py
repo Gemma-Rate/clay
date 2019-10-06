@@ -24,16 +24,17 @@ class MainWindow(tk.Tk):
 
     """
 
-    def __init__(self, parent, text):
+    def __init__(self, parent):
         tk.Tk.__init__(self, parent)
         self.parent = parent
-        self.raw = text
-        # Raw entry text (not modified).
         self.tag_colors = {''}
 
         self.current_tab = None
         self.tab_no = None
         # Empty attributes to fill later.
+
+        self.tab_size = 15
+        # Number of letters in tab size.
 
     @log.log_function
     def grid_config(self):
@@ -61,12 +62,12 @@ class MainWindow(tk.Tk):
         # Bind tab frame so that changing notebook tab triggers tab text
         # selection.
         self.panes.add(self.parent_tabs)
-        self.parent_tabs.grid(sticky='EW')
+        self.parent_tabs.grid(row=0, column=0, columnspan=4, sticky='EW')
 
         # Add tab:
         self.new_tab()
         # Make a text box with this tab.
-        self.add_tab_button()
+        self.tab_add_close_button()
         # Button to add new tabs.
         self.parent_tabs.enable_traversal()
         # Allow tab switching via keyboard.
@@ -90,7 +91,7 @@ class MainWindow(tk.Tk):
         with open(file, 'w') as f:
             f.write(data)
 
-        self.parent_tabs.tab(tab, text=file)
+        self.parent_tabs.tab(tab, text=self.new_tab_text_length(file))
         # Change tab name to saved file name.
 
     @log.log_function
@@ -111,8 +112,10 @@ class MainWindow(tk.Tk):
             # Remove old text.
             tab.text.insert(tk.INSERT, data)
             # Insert the text from the file.
+            tab.raw = data
+            # Raw text.
 
-        self.parent_tabs.tab(tab, text=file)
+        self.parent_tabs.tab(tab, text=self.new_tab_text_length(file))
         # Change tab name to loaded file name.
 
     @log.log_function
@@ -124,7 +127,8 @@ class MainWindow(tk.Tk):
         self.save_file(tab)
         tab.text.delete("1.0", tk.END)
 
-        default_tab_name = 'Doc ' + str(len(self.parent_tabs.tabs()))
+        default_tab_name = 'Document '+str(len(self.parent_tabs.tabs()))
+        default_tab_name = self.new_tab_text_length(default_tab_name)
         self.parent_tabs.tab(tab, text=default_tab_name)
         # Change tab label back to default.
 
@@ -147,10 +151,10 @@ class MainWindow(tk.Tk):
 
         self.menu.add_cascade(label="File", menu=self.file_menu)
 
-        """Menu for tabs"""
-        self.menu.add_command(label='X', command=self.close_tab)
-
         self.config(menu=self.menu)
+
+        """Menu for tabs:"""
+        self.menu.add_command(label='H', command=self.highlight)
 
 
     @log.log_function
@@ -158,25 +162,50 @@ class MainWindow(tk.Tk):
         """
         Add a new text box tab.
         """
-        default_tab_name = 'Doc '+str(len(self.parent_tabs.tabs()))
+        self.stop_width()
 
-        tab_w_box = tb.TabTextBox(self.parent_tabs, self.raw, self.master_height,
+        default_tab_name = 'Document '+str(len(self.parent_tabs.tabs()))
+        default_tab_name = self.new_tab_text_length(default_tab_name)
+        # Ensure tabs are consistent length.
+
+        tab_w_box = tb.TabTextBox(self.parent_tabs, self.master_height,
                                   self.master_width, default_tab_name)
         # Internal container class.
         self.parent_tabs.add(tab_w_box, text=tab_w_box.tab_name)
         tab_w_box.add_text_box()
 
-        self.add_tab_scroll()
-        # Implement scrolling if a large number of tabs is opened...
-
         return tab_w_box
 
     @log.log_function
-    def auto_update(self):
+    def new_tab_text_length(self, tab_text):
         """
-        Auto update the main word grid.
+        Ensure tab title text is the same length as the number defined in
+        self.tab_size.
         """
-        pass
+        if '/' in tab_text:
+            # Search for file path.
+            splitted = tab_text.split('/')
+            tab_text = splitted[-1]
+            # Take last element (likely to be file name).
+
+        list_of_numbers = list(range(1, self.tab_size))
+        # Numbers 1 to self.tab_size.
+
+        max_size = self.tab_size-3
+        new_str = ''
+        for i,t in zip(list_of_numbers, tab_text):
+            if i < max_size:
+                new_str += t
+            else:
+                new_str += '.'
+                # If tab string is oversized, add ...
+
+        if len(new_str) < self.tab_size:
+            # If tab string is undersized, add spaces.
+            spaces_to_add = self.tab_size-len(new_str)
+            new_str += spaces_to_add*' '
+
+        return new_str
 
     @log.log_function
     def select_tab_type(self, event):
@@ -188,15 +217,19 @@ class MainWindow(tk.Tk):
         # Get current tab (for open/closing functions).
 
     @log.log_function
-    def add_tab_button(self):
+    def tab_add_close_button(self):
         """
         Button for generating new tabs.
         """
-        tab_host = tk.ttk.Button(self.panes, text='+')
-        tab_host.grid(column=0, row=0, sticky='NE')
-        # Add a button.
-        tab_host.bind('<Button-1>', self.new_tab)
+        tab_add = tk.ttk.Button(self.panes, text='+', width=2)
+        tab_add.grid(column=3, row=1, sticky='NE')
+        # Add a button to open a new tab.
+        tab_add.bind('<Button-1>', self.new_tab)
         # Create new tab when pressing the new tab button.
+
+        tab_close = tk.ttk.Button(self.panes, text='x', width=2)
+        tab_close.grid(column=0, row=1, sticky='NE')
+        tab_close.bind('<Button-1>', self.close_tab)
 
     @log.log_function
     def add_tab_scroll(self):
@@ -205,22 +238,20 @@ class MainWindow(tk.Tk):
         tabs.
         """
 
-        if len(self.parent_tabs.tabs()) >5:
-            scroll_tab_l = tk.ttk.Button(self.panes, text='<')
-            scroll_tab_l.grid(column=0, row=1, sticky='NE')
-            scroll_tab_r = tk.ttk.Button(self.panes, text='>')
-            scroll_tab_r.grid(column=1, row=1, sticky='NE')
-            # Add scroll buttons.
-            scroll_tab_l.bind('<Button-1>', self.scroll_tab_left)
-            scroll_tab_r.bind('<Button-1>', self.scroll_tab_right)
-            # Scroll to left or right tab.
+        scroll_tab_l = tk.ttk.Button(self.panes, text='<', width=2)
+        scroll_tab_l.grid(column=1, row=1, sticky='NE')
+        scroll_tab_r = tk.ttk.Button(self.panes, text='>', width=2)
+        scroll_tab_r.grid(column=2, row=1, sticky='NE')
+        # Add scroll buttons.
+        scroll_tab_l.bind('<Button-1>', self.scroll_tab_left)
+        scroll_tab_r.bind('<Button-1>', self.scroll_tab_right)
+        # Scroll to left or right tab.
 
-
-    def scroll_tab_left(self, event):
+    @log.log_function
+    def scroll_tab_left(self, event=None):
         """
         Select tab to the left.
         """
-        first_tab = self.parent_tabs.tabs()[0]
         all_tabs = self.parent_tabs.tabs()
         # Get ID of first and last tabs.
 
@@ -234,7 +265,7 @@ class MainWindow(tk.Tk):
             self.parent_tabs.select(next_left)
             # Get widget name of tab to the left and switch to it.
 
-            tabs_to_end = index_now+13
+            tabs_to_end = index_now+6
 
             # Hide some tabs:
             for t in all_tabs[tabs_to_end:]:
@@ -245,23 +276,26 @@ class MainWindow(tk.Tk):
         else:
             pass
 
-    def scroll_tab_right(self, event):
+    @log.log_function
+    def scroll_tab_right(self, event=None):
         """
         Select tab to the right.
         """
         all_tabs = self.parent_tabs.tabs()
-        last_tab = self.parent_tabs.tabs()[-1]
-        # Get ID of first and last tabs.
+        # Get ID of all tabs.
+        tot_index = len(all_tabs)-1
+        # Total index to compare.
 
-        if self.parent_tabs.index(self.current_tab) != len(all_tabs):
+        if self.parent_tabs.index(self.current_tab) != tot_index:
             # If we're not at the last tab, scroll right.
 
             index_now = self.parent_tabs.index(self.current_tab)
             right_index = index_now+1
             # Get index of tab to the left.
+
             next_right = self.parent_tabs.tabs()[right_index]
             self.parent_tabs.select(next_right)
-            # Get widget name of tab to the left and switch to it.
+            # Get widget name of tab to the right and switch to it.
 
             tabs_to_end = index_now
 
@@ -272,8 +306,28 @@ class MainWindow(tk.Tk):
             pass
 
     @log.log_function
-    def close_tab(self):
+    def close_tab(self, event):
         """
         Close selected tab.
         """
         self.parent_tabs.forget(self.current_tab)
+
+    @log.log_function
+    def stop_width(self):
+        """
+        Stop extra tabs from expanding the widths beyond the window.
+        """
+        number_of_tabs = len(self.parent_tabs.tabs())+1
+
+        if number_of_tabs >= 8:
+            self.add_tab_scroll()
+            # Implement scrolling if a large number of tabs is opened...
+            self.scroll_tab_right()
+            # Scroll left to make room for the new tab.
+
+    @log.log_function
+    def highlight(self):
+        self.current_tab.highlight_word_types()
+
+
+
