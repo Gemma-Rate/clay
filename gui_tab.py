@@ -44,8 +44,10 @@ class TabTextBox(tk.Frame):
         Add a new text box to the tab.
         """
         self.text = tk.Text(self, height=self.xdim,
-                            width=self.ydim, wrap='word')
+                            width=self.ydim, wrap='word',
+                            font=('Tempus Sans ITC', 12))
         # Make a text object.
+
         self.text.grid(column=0, row=0, sticky='EW')
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
@@ -56,7 +58,7 @@ class TabTextBox(tk.Frame):
         # Add the scrollbar.
 
     @log.log_function
-    def colourise_text(self, text, fgcolour, bgcolour, name):
+    def colourise_text(self, text, fgcolour, bgcolour, name, index):
         """
         Make text a different colour.
 
@@ -73,10 +75,23 @@ class TabTextBox(tk.Frame):
 
         """
         self.text.tag_config(name, foreground=fgcolour, background=bgcolour,
-                            font=('Tempus Sans ITC', 12, 'bold'))
+                             font=('Tempus Sans ITC', 12))
         # Set tagging configuration.
-        self.text.insert(tk.END, text, name)
+
+
+        start, end = self.index_start_and_end(index, text)
+        self.text.tag_add(name, start, end)
+        #self.text.insert(tk.END, text, name)
         # Add highlight to element of text.
+
+    @log.log_function
+    def index_start_and_end(self, index, text):
+
+        start_index = str(index)
+        index_split = start_index.split('.')
+        end_index = index_split[0]+'.'+str(int(index_split[1])+len(text))
+
+        return start_index, end_index
 
     @log.log_function
     def insert_spaces(self):
@@ -99,12 +114,20 @@ class TabTextBox(tk.Frame):
         """
         Highlight specific word types.
         """
+        self.raw = self.text.get('1.0', tk.END)
+        # Get current text input.
         wc = wd.WordSet(self.raw)
+        # Make a class of the data.
         wc.label_word_types()
-        self.highlight_words('the', wc)
+        #self.text.delete("1.0", tk.END)
+        # Delete text in box.
+        self.highlight_words('the', wc, name='the')
+        self.highlight_words('toilet', wc, name='toilet', color='green')
+        # Use the data save in the WordSet class to input the same
+        # text, but highlighted.
 
     @log.log_function
-    def highlight_words(self, keyword, wc, color='blue'):
+    def highlight_words(self, keyword, wc, color='blue', name='highlight'):
         """
         Highlight specific words.
 
@@ -120,13 +143,15 @@ class TabTextBox(tk.Frame):
             String of containing colour.
         """
         # Store indices of punctuation marks to delete extra spaces.
+        index_pos = '1.0'
         for i,w in enumerate(wc.token):
             if w == keyword:
-                self.colourise_text(w, 'snow', 'blue', 'highlight')
-                self.insert_spaces()
-            else:
-                self.colourise_text(w, 'black', 'snow', 'general')
-                self.insert_spaces()
+                index_pos = self.text.search(w, index_pos, stopindex="end")
+                self.colourise_text(w, 'snow', color, name, index_pos)
+
+                start, index_pos = self.index_start_and_end(index_pos, w)
+                # Set index to begin highlighting at the end of the matched
+                # word.
 
     @log.log_function
     def scrollbar(self):

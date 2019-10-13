@@ -155,6 +155,7 @@ class MainWindow(tk.Tk):
 
         """Menu for tabs:"""
         self.menu.add_command(label='H', command=self.highlight)
+        self.menu.add_command(label='R', command=self.remove_formatting)
 
 
     @log.log_function
@@ -327,7 +328,19 @@ class MainWindow(tk.Tk):
 
     @log.log_function
     def highlight(self):
+        """
+        Wrapper to highlight words in a text box of a tab.
+        """
         self.current_tab.highlight_word_types()
+        self.update()
+
+    @log.log_function
+    def remove_formatting(self):
+        """
+        Remove formatting from text in a tab (e.g highlights).
+        """
+        self.current_tab.text.delete('1.0', 'end-1c')
+        self.current_tab.text.insert(tk.END, self.current_tab.raw)
 
 
 
