@@ -153,6 +153,26 @@ class MainWindow(tk.Tk):
 
         self.config(menu=self.menu)
 
+        """Menu for highlights"""
+        self.highlight_menu = tk.Menu(self.menu)
+
+        toggle_list = ['Adjective', 'Verb']
+        # List of toggle highlight names.
+        self.to_toggle = [('RB', 'RBR','RBS'), ('VB', 'VBD', 'VBG',
+                           'VBN', 'VBP', 'VBZ')]
+        # List of word tag groups corresponding to toggle_list names.
+        self.set_to_on = [tk.IntVar(value=1) for x in toggle_list]
+
+        for tl, stt, tg in zip(toggle_list, self.to_toggle, self.set_to_on):
+            # Start by setting all selections to on.
+            self.highlight_menu.add_checkbutton(label=tl, onvalue=1,
+                                                offvalue=0,
+                                                command=lambda : self.highlight_checkbox_control(stt),
+                                                variable=tg)
+            # Add menu checkbox for each type of word highlight.
+
+        self.menu.add_cascade(label='Highlights', menu=self.highlight_menu)
+
         """Menu for tabs:"""
         self.menu.add_command(label='H', command=self.highlight)
         self.menu.add_command(label='R', command=self.remove_formatting)
@@ -331,8 +351,7 @@ class MainWindow(tk.Tk):
         """
         Wrapper to highlight words in a text box of a tab.
         """
-        self.current_tab.highlight_word_types()
-        self.update()
+        self.current_tab.highlight_word_types(self.to_toggle)
 
     @log.log_function
     def remove_formatting(self):
@@ -342,5 +361,15 @@ class MainWindow(tk.Tk):
         self.current_tab.text.delete('1.0', 'end-1c')
         self.current_tab.text.insert(tk.END, self.current_tab.raw)
 
+
+    @log.log_function
+    def highlight_checkbox_control(self, word_class_list):
+        """
+        Create checkboxes to select the classes of word types to highlight.
+        """
+        if word_class_list not in self.to_toggle:
+            self.to_toggle.append(word_class_list)
+        else:
+            self.to_toggle.remove(word_class_list)
 
 

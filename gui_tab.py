@@ -78,11 +78,9 @@ class TabTextBox(tk.Frame):
                              font=('Tempus Sans ITC', 12))
         # Set tagging configuration.
 
-
         start, end = self.index_start_and_end(index, text)
         self.text.tag_add(name, start, end)
-        #self.text.insert(tk.END, text, name)
-        # Add highlight to element of text.
+        # Add highlight to text.
 
     @log.log_function
     def index_start_and_end(self, index, text):
@@ -110,7 +108,7 @@ class TabTextBox(tk.Frame):
         self.text.insert(tk.END, ' ')
 
     @log.log_function
-    def highlight_word_types(self):
+    def highlight_word_types(self, to_include):
         """
         Highlight specific word types.
         """
@@ -119,10 +117,20 @@ class TabTextBox(tk.Frame):
         wc = wd.WordSet(self.raw)
         # Make a class of the data.
         wc.label_word_types()
-        #self.text.delete("1.0", tk.END)
-        # Delete text in box.
-        self.highlight_words('the', wc, name='the')
-        self.highlight_words('toilet', wc, name='toilet', color='green')
+        # Label word types.
+
+        flatten = [x for y in to_include for x in y]
+        # Get rid of tupples.
+
+        for w, t in wc.pos:
+            if t in flatten:
+                try:
+                    colour = wc.word_colours[t]
+                    self.highlight_words(w, wc, name=t, color=colour)
+                except KeyError:
+                    pass
+            else:
+                pass
         # Use the data save in the WordSet class to input the same
         # text, but highlighted.
 
@@ -148,7 +156,6 @@ class TabTextBox(tk.Frame):
             if w == keyword:
                 index_pos = self.text.search(w, index_pos, stopindex="end")
                 self.colourise_text(w, 'snow', color, name, index_pos)
-
                 start, index_pos = self.index_start_and_end(index_pos, w)
                 # Set index to begin highlighting at the end of the matched
                 # word.

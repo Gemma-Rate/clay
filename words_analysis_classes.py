@@ -43,7 +43,9 @@ class WordSet(object):
                              'VBN':'blue', 'VBP':'blue', 'VBZ':'blue',
                              'NN':'red', 'NNS':'red', 'NNP':'red4',
                              'NNPS':'red4', 'JJ':'green', 'JJR':'green',
-                             'JJS':'green'}
+                             'JJS':'green', 'DT':'grey', 'IN':'purple1',
+                             'RB':'yellow', 'RBR':'yellow','RBS':'yellow'
+                             }
 
 
     def label_word_types(self):
@@ -104,3 +106,20 @@ class WordSet(object):
 
         return datatoken
 
+    @log.log_function
+    def wordnet_similar(self, k=9):
+        """
+        Display similar words, as obtained from wordnet.
+
+        Parameters
+        -----------
+        k : string
+        Number of nearest words to be displayed.
+
+        Returns
+        -------
+        datatoken : list
+        List of tokenised data.
+
+        """
+        pass
