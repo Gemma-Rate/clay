@@ -61,7 +61,7 @@ class MainWindow(tk.Tk):
         self.parent_tabs.bind('<<NotebookTabChanged>>', self.select_tab_type)
         # Bind tab frame so that changing notebook tab triggers tab text
         # selection.
-        self.panes.add(self.parent_tabs)
+        self.panes.add(self.parent_tabs, stretch="always")
         self.parent_tabs.grid(row=0, column=0, columnspan=4, sticky='EW')
 
         # Add tab:
@@ -71,6 +71,12 @@ class MainWindow(tk.Tk):
         # Button to add new tabs.
         self.parent_tabs.enable_traversal()
         # Allow tab switching via keyboard.
+
+        """Region display"""
+        self.label_frame = tk.ttk.Labelframe(self.panes, text='Label', width=300,
+                                             height=self.master_height)
+        self.panes.add(self.label_frame, stretch="always")
+        self.label_frame.grid(row=0, column=5)
 
         self.update()
         # Update based on events.
@@ -156,18 +162,22 @@ class MainWindow(tk.Tk):
         """Menu for highlights"""
         self.highlight_menu = tk.Menu(self.menu)
 
-        toggle_list = ['Adjective', 'Verb']
+        self.toggle_name_full = ['Adjective', 'Verb']
         # List of toggle highlight names.
-        self.to_toggle = [('RB', 'RBR','RBS'), ('VB', 'VBD', 'VBG',
-                           'VBN', 'VBP', 'VBZ')]
+        self.toggle_pos_full = [('RB', 'RBR','RBS'), ('VB', 'VBD', 'VBG',
+                                 'VBN', 'VBP', 'VBZ')]
         # List of word tag groups corresponding to toggle_list names.
-        self.set_to_on = [tk.IntVar(value=1) for x in toggle_list]
+        self.toggle_pos = [('RB', 'RBR','RBS'), ('VB', 'VBD', 'VBG',
+                                 'VBN', 'VBP', 'VBZ')]
+        # Pos tags currently set to be highlighted.
+        self.set_to_on = [tk.IntVar(value=1) for t in self.toggle_name_full]
+        # Variable list for checkboxes.
 
-        for tl, stt, tg in zip(toggle_list, self.to_toggle, self.set_to_on):
+        for tl, tg in zip(self.toggle_name_full, self.set_to_on): #, self.set_to_on):
             # Start by setting all selections to on.
             self.highlight_menu.add_checkbutton(label=tl, onvalue=1,
                                                 offvalue=0,
-                                                command=lambda : self.highlight_checkbox_control(stt),
+                                                command=lambda : self.highlight_checkbox_control(tg),
                                                 variable=tg)
             # Add menu checkbox for each type of word highlight.
 
@@ -351,7 +361,7 @@ class MainWindow(tk.Tk):
         """
         Wrapper to highlight words in a text box of a tab.
         """
-        self.current_tab.highlight_word_types(self.to_toggle)
+        self.current_tab.highlight_word_types(self.toggle_pos)
 
     @log.log_function
     def remove_formatting(self):
@@ -363,13 +373,18 @@ class MainWindow(tk.Tk):
 
 
     @log.log_function
-    def highlight_checkbox_control(self, word_class_list):
+    def highlight_checkbox_control(self, tg):
         """
         Create checkboxes to select the classes of word types to highlight.
         """
-        if word_class_list not in self.to_toggle:
-            self.to_toggle.append(word_class_list)
-        else:
-            self.to_toggle.remove(word_class_list)
+        for var, tg, ps in zip(self.set_to_on, self.toggle_name_full,
+                               self.toggle_pos_full):
+            if var.get() == 1:
+                if ps not in self.toggle_pos:
+                    self.toggle_pos.append(ps)
+            else:
+                if ps in self.toggle_pos:
+                    self.toggle_pos.remove(ps)
+
 
 
