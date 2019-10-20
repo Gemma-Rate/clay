@@ -22,7 +22,7 @@ class TabTextBox(tk.Frame):
 
     """
 
-    def __init__(self, parent, xdim, ydim, tab_name):
+    def __init__(self, parent, xdim, ydim, tab_name, md):
         tk.Frame.__init__(self, parent)
         self.parent = parent
         self.text = None
@@ -35,6 +35,9 @@ class TabTextBox(tk.Frame):
         self.ydim = ydim - 10
         # Full y dimension of the tab widget area.
         self.tab_name = tab_name
+
+        self.md_core = md
+        # Classifier from Spacy, loaded in gui_windows.
 
         # Frame to store things in.
 
@@ -114,7 +117,7 @@ class TabTextBox(tk.Frame):
         """
         self.raw = self.text.get('1.0', tk.END)
         # Get current text input.
-        wc = wd.WordSet(self.raw)
+        wc = wd.WordSet(self.raw, self.md_core)
         # Make a class of the data.
         wc.label_word_types()
         # Label word types.

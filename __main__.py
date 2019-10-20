@@ -1,6 +1,5 @@
 """Main execution file."""
 import log
-import tkinter.ttk as tk
 import gui_windows as gu
 
 log.log_setup()

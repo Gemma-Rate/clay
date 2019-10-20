@@ -4,7 +4,6 @@ Classes for analysing prose itself.
 import nltk
 import re
 import log
-import spacy as sp
 
 # Highlighting.
 # Nearby word similarity.
@@ -33,7 +32,7 @@ class WordSet(object):
 
     """
 
-    def __init__(self, text):
+    def __init__(self, text, md):
         self.raw = text
         self.token = self.word_token(text, no_punctuation=None, lower=None)
         # Keeps in punctuation and upper cases.
@@ -47,7 +46,7 @@ class WordSet(object):
                              'JJS':'green', 'DT':'grey', 'IN':'purple1',
                              'RB':'yellow', 'RBR':'yellow','RBS':'yellow'
                              }
-        self.md_core = None
+        self.md_core = md
 
 
     def label_word_types(self):
@@ -113,11 +112,10 @@ class WordSet(object):
         """
         Get similarity between vectors.
         """
-        if not self.md_core:
-            self.md_core = sp.load("en_core_web_md")
-            # Load in the medium sized dataset (may take a moment).
         s1, s2 = self.md_core(s1), self.md_core(s2)
         sim = s1.similarity(s2)
+
+        return sim
 
 
     @log.log_function

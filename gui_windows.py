@@ -7,6 +7,7 @@ import tkinter.ttk
 import tkinter.filedialog
 import log
 import gui_tab as tb
+import spacy as sp
 
 class MainWindow(tk.Tk):
     """
@@ -28,13 +29,14 @@ class MainWindow(tk.Tk):
         tk.Tk.__init__(self, parent)
         self.parent = parent
         self.tag_colors = {''}
+        self.md_core = sp.load("en_core_web_md")
+        # Load in the medium sized dataset (may take a moment).
 
         self.current_tab = None
         self.tab_no = None
         # Empty attributes to fill later.
 
         self.tab_size = 15
-        # Number of letters in tab size.
 
     @log.log_function
     def grid_config(self):
@@ -72,11 +74,14 @@ class MainWindow(tk.Tk):
         self.parent_tabs.enable_traversal()
         # Allow tab switching via keyboard.
 
-        """Region display"""
-        self.label_frame = tk.ttk.Labelframe(self.panes, text='Label', width=300,
-                                             height=self.master_height)
-        self.panes.add(self.label_frame, stretch="always")
-        self.label_frame.grid(row=0, column=5)
+        """Similarity region display"""
+        self.similarity_frame = tk.ttk.Labelframe(self.panes,
+                                                  text='Similarity navigation',
+                                                  width=300,
+                                                  height=self.master_height)
+        self.panes.add(self.similarity_frame, stretch="always")
+        self.similarity_frame.grid(row=0, column=5)
+        self.box_grid()
 
         self.update()
         # Update based on events.
@@ -177,7 +182,7 @@ class MainWindow(tk.Tk):
             # Start by setting all selections to on.
             self.highlight_menu.add_checkbutton(label=tl, onvalue=1,
                                                 offvalue=0,
-                                                command=lambda : self.highlight_checkbox_control(tg),
+                                                command=lambda : self.highlight_checkbox_control(),
                                                 variable=tg)
             # Add menu checkbox for each type of word highlight.
 
@@ -200,7 +205,8 @@ class MainWindow(tk.Tk):
         # Ensure tabs are consistent length.
 
         tab_w_box = tb.TabTextBox(self.parent_tabs, self.master_height,
-                                  self.master_width, default_tab_name)
+                                  self.master_width, default_tab_name,
+                                  self.md_core)
         # Internal container class.
         self.parent_tabs.add(tab_w_box, text=tab_w_box.tab_name)
         tab_w_box.add_text_box()
@@ -371,9 +377,8 @@ class MainWindow(tk.Tk):
         self.current_tab.text.delete('1.0', 'end-1c')
         self.current_tab.text.insert(tk.END, self.current_tab.raw)
 
-
     @log.log_function
-    def highlight_checkbox_control(self, tg):
+    def highlight_checkbox_control(self):
         """
         Create checkboxes to select the classes of word types to highlight.
         """
@@ -385,6 +390,20 @@ class MainWindow(tk.Tk):
             else:
                 if ps in self.toggle_pos:
                     self.toggle_pos.remove(ps)
+
+    @log.log_function
+    def box_grid(self, xdim=5, ydim=5):
+        """
+        Create a grid of buttons to select.
+        """
+        for x in range(xdim):
+            for y in range(ydim):
+                tab_add = tk.ttk.Button(self.similarity_frame, text='+',
+                                        width=3)
+                tab_add.grid(column=x, row=y, sticky='NE')
+                # Add a button to open a new tab.
+                #tab_add.bind('<Button-1>', self.new_tab)
+                # Create new tab when pressing the new tab button.
 
 
 
