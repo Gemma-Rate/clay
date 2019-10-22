@@ -178,9 +178,19 @@ class TabTextBox(tk.Frame):
 
 
     @log.log_function
-    def capture_text(self):
+    def capture_highlighted_text(self, colour='blue', name='highlight'):
         """
-        Capture text entered into the tab text box.
+        Capture text that is highlighted.
         """
-        #<Key>
-        pass
+        if self.text.tag_ranges(tk.SEL):
+            highlighted_by_cursor = self.text.get(tk.SEL_FIRST, tk.SEL_LAST)
+            # Get text currently highlighted by cursor.
+            start = self.text.search(highlighted_by_cursor, '1.0',
+                                         stopindex="end", count=1)
+            # Start point of text.
+            end = self.text.index(tk.INSERT)
+
+            self.text.tag_config('highlight', foreground=colour, background='snow',
+                                 font=('Tempus Sans ITC', 12))
+            self.text.tag_add('highlight', start, end)
+            # Highlight the text in colour.

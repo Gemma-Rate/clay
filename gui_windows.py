@@ -189,8 +189,9 @@ class MainWindow(tk.Tk):
         self.menu.add_cascade(label='Highlights', menu=self.highlight_menu)
 
         """Menu for tabs:"""
-        self.menu.add_command(label='H', command=self.highlight)
+        self.menu.add_command(label='H', command=self.highlight_word_types)
         self.menu.add_command(label='R', command=self.remove_formatting)
+        self.menu.add_command(label='S', command=self.select_highlighted_text)
 
 
     @log.log_function
@@ -363,7 +364,7 @@ class MainWindow(tk.Tk):
             # Scroll left to make room for the new tab.
 
     @log.log_function
-    def highlight(self):
+    def highlight_word_types(self):
         """
         Wrapper to highlight words in a text box of a tab.
         """
@@ -392,6 +393,11 @@ class MainWindow(tk.Tk):
                     self.toggle_pos.remove(ps)
 
     @log.log_function
+    def select_highlighted_text(self):
+        self.current_tab.capture_highlighted_text()
+
+
+    @log.log_function
     def box_grid(self, xdim=5, ydim=5):
         """
         Create a grid of buttons to select.
@@ -402,8 +408,6 @@ class MainWindow(tk.Tk):
                                         width=3)
                 tab_add.grid(column=x, row=y, sticky='NE')
                 # Add a button to open a new tab.
-                #tab_add.bind('<Button-1>', self.new_tab)
-                # Create new tab when pressing the new tab button.
-
+                #tab_add.bind('<Button-1>', self.select_highlighted_text)
 
 
