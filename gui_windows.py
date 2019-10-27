@@ -81,7 +81,6 @@ class MainWindow(tk.Tk):
                                                   height=self.master_height)
         self.panes.add(self.similarity_frame, stretch="always")
         self.similarity_frame.grid(row=0, column=5)
-        self.box_grid()
 
         self.update()
         # Update based on events.
@@ -191,7 +190,7 @@ class MainWindow(tk.Tk):
         """Menu for tabs:"""
         self.menu.add_command(label='H', command=self.highlight_word_types)
         self.menu.add_command(label='R', command=self.remove_formatting)
-        self.menu.add_command(label='S', command=self.select_highlighted_text)
+        self.menu.add_command(label='S', command=self.similarity_user_highlight)
 
 
     @log.log_function
@@ -393,18 +392,26 @@ class MainWindow(tk.Tk):
                     self.toggle_pos.remove(ps)
 
     @log.log_function
-    def select_highlighted_text(self):
-        self.current_tab.capture_highlighted_text()
+    def similarity_user_highlight(self):
+        """
+        Calculate similarity between two highlighted sections.
+        :return:
+        """
+        similarity = self.current_tab.similarity_of_highlighted_texts()
+
+        sim_label = tk.ttk.Label(self.similarity_frame,
+                                 text='Similarity: {}'.format(similarity))
+        sim_label.grid(row=0, column=0, columnspan=4, sticky='EW')
 
 
     @log.log_function
-    def box_grid(self, xdim=5, ydim=5):
+    def box_grid(self, frame, xdim=5, ydim=5):
         """
         Create a grid of buttons to select.
         """
         for x in range(xdim):
             for y in range(ydim):
-                tab_add = tk.ttk.Button(self.similarity_frame, text='+',
+                tab_add = tk.ttk.Button(frame, text='+',
                                         width=3)
                 tab_add.grid(column=x, row=y, sticky='NE')
                 # Add a button to open a new tab.

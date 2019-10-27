@@ -39,6 +39,10 @@ class TabTextBox(tk.Frame):
         self.md_core = md
         # Classifier from Spacy, loaded in gui_windows.
 
+        self.higlighted_text_list =[]
+        self.text_selected = tk.StringVar()
+        # List of all currently highlighted text (currently empty).
+
         # Frame to store things in.
 
     @log.log_function
@@ -59,6 +63,20 @@ class TabTextBox(tk.Frame):
         # Add text.
         self.scrollbar()
         # Add the scrollbar.
+
+        self.text.bind('<B1-Motion><ButtonRelease-1>',
+                       self.capture_highlighted_text)
+        # Set capture_highlighted_text as selected by the text box.
+        self.text.bind('<KeyRelease>', self.update_raw)
+        # Set update for when new text is written.
+
+    @log.log_function
+    def update_raw(self, event):
+        """
+        Update the raw data, based on input from user.
+        """
+        self.raw = self.text.get('1.0', tk.END)
+
 
     @log.log_function
     def colourise_text(self, text, fgcolour, bgcolour, name, index):
@@ -155,7 +173,7 @@ class TabTextBox(tk.Frame):
         """
         # Store indices of punctuation marks to delete extra spaces.
         index_pos = '1.0'
-        for i,w in enumerate(wc.token):
+        for w in wc.token:
             if w == keyword:
                 index_pos = self.text.search(w, index_pos, stopindex="end")
                 self.colourise_text(w, 'snow', color, name, index_pos)
@@ -178,19 +196,73 @@ class TabTextBox(tk.Frame):
 
 
     @log.log_function
-    def capture_highlighted_text(self, colour='blue', name='highlight'):
+    def capture_highlighted_text(self, event):
         """
         Capture text that is highlighted.
         """
-        if self.text.tag_ranges(tk.SEL):
-            highlighted_by_cursor = self.text.get(tk.SEL_FIRST, tk.SEL_LAST)
-            # Get text currently highlighted by cursor.
-            start = self.text.search(highlighted_by_cursor, '1.0',
-                                         stopindex="end", count=1)
-            # Start point of text.
-            end = self.text.index(tk.INSERT)
+        highlighted_by_cursor = self.text.get(tk.SEL_FIRST, tk.SEL_LAST)
+        self.text_selected.set(highlighted_by_cursor)
 
-            self.text.tag_config('highlight', foreground=colour, background='snow',
-                                 font=('Tempus Sans ITC', 12))
-            self.text.tag_add('highlight', start, end)
-            # Highlight the text in colour.
+
+    @log.log_function
+    def tag_highlighted_text(self, colour='blue', tag_name='highlight'):
+        """
+        Tag the text from capture_highlighted_text.
+        """
+
+        highlighted_by_cursor = self.text.get(tk.SEL_FIRST, tk.SEL_LAST)
+        # Get text currently highlighted by cursor.
+        start = self.text.search(highlighted_by_cursor, '1.0',
+                                     stopindex="end", count=1)
+        # Start point of text.
+        end = self.text.index(tk.INSERT)
+
+        self.text.tag_config(tag_name, foreground='snow', background=colour,
+                             font=('Tempus Sans ITC', 12))
+        self.text.tag_add(tag_name, start, end)
+        # Highlight the text in colour.
+
+        #self.text.tag_remove(tk.SEL_FIRST, tk.SEL_LAST)
+        # Deselect the text.
+
+        return highlighted_by_cursor
+
+    @log.log_function
+    def similarity_of_highlighted_texts(self):
+        """
+        Get the similarities of two sections of highlighted text.
+        """
+
+        wc = wd.WordSet(self.raw, self.md_core)
+
+        if self.text.tag_ranges(tk.SEL):
+            h1 = self.tag_highlighted_text(colour='blue', tag_name='h1')
+        else:
+            self.wait_variable(self.text_selected)
+            h1 = self.tag_highlighted_text(colour='blue', tag_name='h1')
+
+        self.wait_variable(self.text_selected)
+        # Wait for next highlight.
+        h2 = self.tag_highlighted_text(colour='red', tag_name='h2')
+
+        sim = wc.spacy_sim(h1, h2)
+
+        return sim
+
+    @log.log_function
+    def similarity_to_all_sentences(self, selected_sentence):
+        """
+        Get similarity of the highlighted sentence to all other sentences.
+        """
+        index = '1.0'
+        wc = wd.WordSet(self.raw, self.md_core)
+
+        #for s in wc.sentences:
+            # Check to see which sentence is being highlighted.
+
+
+        #self.index_start_and_end(index, text)
+
+
+        pass
+
