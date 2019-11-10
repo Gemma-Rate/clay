@@ -190,7 +190,8 @@ class MainWindow(tk.Tk):
         """Menu for tabs:"""
         self.menu.add_command(label='H', command=self.highlight_word_types)
         self.menu.add_command(label='R', command=self.remove_formatting)
-        self.menu.add_command(label='S', command=self.similarity_user_highlight)
+        self.menu.add_command(label='S1', command=self.similarity_user_highlight)
+        self.menu.add_command(label='S2', command=self.similarity_all)
 
 
     @log.log_function
@@ -230,7 +231,7 @@ class MainWindow(tk.Tk):
 
         max_size = self.tab_size-3
         new_str = ''
-        for i,t in zip(list_of_numbers, tab_text):
+        for i, t in zip(list_of_numbers, tab_text):
             if i < max_size:
                 new_str += t
             else:
@@ -398,11 +399,23 @@ class MainWindow(tk.Tk):
         :return:
         """
         similarity = self.current_tab.similarity_of_highlighted_texts()
+        # Get semantic similarity.
+
+        s_percent = 1-similarity/0.75
+
+        s_text = 'Content similarity: {}\nRecommend evaluation: {}'.format(similarity, s_percent)
 
         sim_label = tk.ttk.Label(self.similarity_frame,
-                                 text='Similarity: {}'.format(similarity))
+                                 text=s_text)
         sim_label.grid(row=0, column=0, columnspan=4, sticky='EW')
 
+    @log.log_function
+    def similarity_all(self):
+        """
+        Calculate similaritity between the highlighted sentence and
+        all sentences.
+        """
+        self.current_tab.bind_to_selection()
 
     @log.log_function
     def box_grid(self, frame, xdim=5, ydim=5):
@@ -416,5 +429,3 @@ class MainWindow(tk.Tk):
                 tab_add.grid(column=x, row=y, sticky='NE')
                 # Add a button to open a new tab.
                 #tab_add.bind('<Button-1>', self.select_highlighted_text)
-
-

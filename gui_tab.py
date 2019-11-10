@@ -39,7 +39,7 @@ class TabTextBox(tk.Frame):
         self.md_core = md
         # Classifier from Spacy, loaded in gui_windows.
 
-        self.higlighted_text_list =[]
+        self.highlighted_text_list =[]
         self.text_selected = tk.StringVar()
         # List of all currently highlighted text (currently empty).
 
@@ -105,10 +105,11 @@ class TabTextBox(tk.Frame):
 
     @log.log_function
     def index_start_and_end(self, index, text):
-
+        """
+        Get the start and end index/column positions of the text.
+        """
         start_index = str(index)
-        index_split = start_index.split('.')
-        end_index = index_split[0]+'.'+str(int(index_split[1])+len(text))
+        end_index = '{}+{}c'.format(start_index, len(text))
 
         return start_index, end_index
 
@@ -148,12 +149,15 @@ class TabTextBox(tk.Frame):
                 try:
                     colour = wc.word_colours[t]
                     self.highlight_words(w, wc, name=t, color=colour)
+                    self.highlighted_text_list.append(w)
                 except KeyError:
                     pass
             else:
                 pass
         # Use the data save in the WordSet class to input the same
         # text, but highlighted.
+        list(set(self.highlighted_text_list))
+        # Only get unique elements.
 
     @log.log_function
     def highlight_words(self, keyword, wc, color='blue', name='highlight'):
@@ -174,8 +178,11 @@ class TabTextBox(tk.Frame):
         # Store indices of punctuation marks to delete extra spaces.
         index_pos = '1.0'
         for w in wc.token:
-            if w == keyword:
-                index_pos = self.text.search(w, index_pos, stopindex="end")
+            if w.lower() == keyword:
+                reg_search = r'\y'+w+r'\y'
+                index_pos = self.text.search(reg_search, index_pos, regexp=True,
+                                             stopindex='end')
+                # Search for text keyword as individual word.
                 self.colourise_text(w, 'snow', color, name, index_pos)
                 start, index_pos = self.index_start_and_end(index_pos, w)
                 # Set index to begin highlighting at the end of the matched
@@ -247,22 +254,85 @@ class TabTextBox(tk.Frame):
 
         sim = wc.spacy_sim(h1, h2)
 
+        self.text_selected = tk.StringVar()
+
         return sim
 
     @log.log_function
-    def similarity_to_all_sentences(self, selected_sentence):
+    def get_highlighted_word_by_click(self, event):
         """
-        Get similarity of the highlighted sentence to all other sentences.
+        Turn highlighted words into buttons.
         """
-        index = '1.0'
+        index_pos = '1.0'
+        cursor_position = self.text.index(tk.INSERT)
+        # Get cursor position (as user clicking gives this location).
+
+        for t in self.highlighted_text_list:
+
+            reg_search = r'\y' + t + r'\y'
+            index_pos = self.text.search(reg_search, index_pos, stopindex="end",
+                                         regexp=True)
+            start, index_pos = self.index_start_and_end(index_pos, t)
+            # Search for position of the start of clicked word t.
+
+            start_f = float(start)
+            end_split_plus = index_pos.split('+')
+            # Split off plus.
+            end_split = end_split_plus[0].split('.')
+            # Split at .
+            end_f = float(str(int(end_split[0]))+'.'+
+                          str(int(end_split[1])+len(t)))
+            cursor_f = float(cursor_position)
+            # Change the word start, end and cursor position into floats.
+
+            if (cursor_f > start_f) and (cursor_f < end_f):
+                # Select if cursor position falls between the start and end
+                # of the word.
+                self.colourise_text(t, 'snow', 'red', t, index_pos)
+                # Add a highlight.
+                self.text_selected.set(t)
+
+    @log.log_function
+    def bind_to_selection(self):
+        """bind_to_selection
+        Unbind left button press from previous
+        binding and rebind it to capture sentences.
+        """
+
+        self.text.bind("<Button 1>", self.get_highlighted_word_by_click)
+
+        self.wait_variable(self.text_selected)
+        # Wait for next highlight.
+
+        self.similarity_to_all_highlighted()
+
+        self.text.bind('<B1-Motion><ButtonRelease-1>',
+                       self.capture_highlighted_text)
+        # Return text
+
+
+    @log.log_function
+    def similarity_to_all_highlighted(self):
+        """
+        Get similarity of the highlighted word to all other
+        highlighted words.
+        """
+        index_pos = '1.0'
         wc = wd.WordSet(self.raw, self.md_core)
 
-        #for s in wc.sentences:
+        print(self.text_selected.get())
+
+        for s in self.highlighted_text_list:
             # Check to see which sentence is being highlighted.
 
+            sim = wc.spacy_sim(self.text_selected.get(), s)
+            r, g, b = int(17/10), int(30/10), 108
+            b = int((sim * b)/10)
+            color = "#{:02d}{:02d}{:02d}".format(r,g,b)
+            # Colour or highlight, based on similarity.
 
-        #self.index_start_and_end(index, text)
+            self.colourise_text(s, 'snow', color, s, index_pos)
+            start, index_pos = self.index_start_and_end(index_pos, s)
+            # Highlight text.
 
-
-        pass
 

@@ -6,10 +6,13 @@ import re
 import log
 
 # Highlighting.
-# Nearby word similarity.
-# Sentence simliarity (repetition).
+# Content similarity.
+# Syntatical/lexical simliarity (repetition) - use Jaccard coefficient.
+# Sentiment analysis.
+#
 # Word recommendation.
     # Blurring etc.
+# Named-entity recognition
 
 class WordSet(object):
 
@@ -79,7 +82,7 @@ class WordSet(object):
         pass
 
     @log.log_function
-    def word_token(self, data, no_punctuation=True, lower=True):
+    def word_token(self, data, no_punctuation=True, lower=False):
 
         """
         Strips out the punctuation and tokenises words in the input string
