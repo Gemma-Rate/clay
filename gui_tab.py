@@ -12,10 +12,20 @@ class TabTextBox(tk.Frame):
 
     Public attributes
     -----------------
+    parent : Tcl notebook object
+        Tcl Tk notebook that stores the tab.
     raw : str
         Raw string of input data.
-    processed : list
-        List of tokenised words.
+    text: TKinter text box widget
+        Text box widget stored inside the tab.
+    xdim: int
+        Horizontal size of the tab window in pixels.
+    ydim: int
+        Vertical size of the tab window in pixels.
+    tab_name: str
+        Name of the tab.
+    md_core : Spacy classifier object
+
 
     Class methods
     -----------------
@@ -42,8 +52,6 @@ class TabTextBox(tk.Frame):
         self.highlighted_text_list =[]
         self.text_selected = tk.StringVar()
         # List of all currently highlighted text (currently empty).
-
-        # Frame to store things in.
 
     @log.log_function
     def add_text_box(self):

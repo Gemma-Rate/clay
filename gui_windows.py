@@ -8,6 +8,7 @@ import tkinter.filedialog
 import log
 import gui_tab as tb
 import spacy as sp
+import gui_tooltip as tp
 
 class MainWindow(tk.Tk):
     """
@@ -69,8 +70,22 @@ class MainWindow(tk.Tk):
         # Add tab:
         self.new_tab()
         # Make a text box with this tab.
-        self.tab_add_close_button()
-        # Button to add new tabs.
+
+        """Menu buttons for tabs:"""
+        self.add_button(self.highlight_word_types, 4, 1, 'H', self.panes, width=2,
+                        further_text='Highlight word types')
+
+        self.add_button(self.remove_formatting, 5, 1, 'R', self.panes, width=2,
+                        further_text='Remove formatting')
+        self.add_button(self.similarity_user_highlight, 6, 1, 's1', self.panes, width=2)
+        self.add_button(self.similarity_all, 7, 1, 's2', self.panes, width=2)
+
+        self.add_button(self.new_tab, 3, 1, '+', self.panes, width=2,
+                        further_text='Open new tab')
+        # Create new tab when pressing the new tab button.
+        self.add_button(self.close_tab, 0, 1, 'x', self.panes, width=2,
+                        further_text='Close current tab')
+        # Remove current tab when pressing the button.
         self.parent_tabs.enable_traversal()
         # Allow tab switching via keyboard.
 
@@ -232,12 +247,6 @@ class MainWindow(tk.Tk):
 
         self.menu.add_cascade(label='Highlights', menu=self.highlight_menu)
 
-        """Menu for tabs:"""
-        self.menu.add_command(label='H', command=self.highlight_word_types)
-        self.menu.add_command(label='R', command=self.remove_formatting)
-        self.menu.add_command(label='S1', command=self.similarity_user_highlight)
-        self.menu.add_command(label='S2', command=self.similarity_all)
-
 
     @log.log_function
     def new_tab(self, event=None):
@@ -300,19 +309,21 @@ class MainWindow(tk.Tk):
         # Get current tab (for open/closing functions).
 
     @log.log_function
-    def tab_add_close_button(self):
+    def add_button(self, to_bind, col, row, text, paneloc, width=1,
+                   stick='NE', further_text=None):
         """
-        Button for generating new tabs.
+        Function for generating new buttons conveniently.
         """
-        tab_add = tk.ttk.Button(self.panes, text='+', width=2)
-        tab_add.grid(column=3, row=1, sticky='NE')
-        # Add a button to open a new tab.
-        tab_add.bind('<Button-1>', self.new_tab)
-        # Create new tab when pressing the new tab button.
+        button = tk.ttk.Button(paneloc, text=text, width=width)
+        button.grid(column=col, row=row, sticky=stick)
+        # Add a button to do the callback.
+        button.bind('<Button-1>', to_bind)
+        # Perform callback when pressing the button.
 
-        tab_close = tk.ttk.Button(self.panes, text='x', width=2)
-        tab_close.grid(column=0, row=1, sticky='NE')
-        tab_close.bind('<Button-1>', self.close_tab)
+        if further_text:
+            self.hover_tooltip(button, further_text)
+        else:
+            self.hover_tooltip(button, text)
 
     @log.log_function
     def add_tab_scroll(self):
@@ -409,14 +420,14 @@ class MainWindow(tk.Tk):
             # Scroll left to make room for the new tab.
 
     @log.log_function
-    def highlight_word_types(self):
+    def highlight_word_types(self, event):
         """
         Wrapper to highlight words in a text box of a tab.
         """
         self.current_tab.highlight_word_types(self.toggle_pos)
 
     @log.log_function
-    def remove_formatting(self):
+    def remove_formatting(self, event):
         """
         Remove formatting from text in a tab (e.g highlights).
         """
@@ -438,7 +449,7 @@ class MainWindow(tk.Tk):
                     self.toggle_pos.remove(ps)
 
     @log.log_function
-    def similarity_user_highlight(self):
+    def similarity_user_highlight(self, event):
         """
         Calculate similarity between two highlighted sections.
         :return:
@@ -455,7 +466,7 @@ class MainWindow(tk.Tk):
         sim_label.grid(row=0, column=0, columnspan=4, sticky='EW')
 
     @log.log_function
-    def similarity_all(self):
+    def similarity_all(self, event):
         """
         Calculate similaritity between the highlighted sentence and
         all sentences.
@@ -474,3 +485,12 @@ class MainWindow(tk.Tk):
                 tab_add.grid(column=x, row=y, sticky='NE')
                 # Add a button to open a new tab.
                 #tab_add.bind('<Button-1>', self.select_highlighted_text)
+
+    @log.log_function
+    def hover_tooltip(self, widget, text):
+        """
+        Display explanation of menu button names and outputs from analysis.
+        """
+        tip = tp.ToolTipDisplay(widget, text)
+        tip.bind_to()
+
