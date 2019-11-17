@@ -52,7 +52,8 @@ class TabTextBox(tk.Frame):
         """
         self.text = tk.Text(self, height=self.xdim,
                             width=self.ydim, wrap='word',
-                            font=('Tempus Sans ITC', 12))
+                            font=('Tempus Sans ITC', 12),
+                            undo=True)
         # Make a text object.
 
         self.text.grid(column=0, row=0, sticky='EW')

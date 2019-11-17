@@ -143,6 +143,37 @@ class MainWindow(tk.Tk):
         # Change tab label back to default.
 
     @log.log_function
+    def tab_copy(self):
+        """
+        Copy selected text.
+        """
+        self.clipboard_clear()
+        # Clear the clipboard.
+        self.current_tab.bind('<B1-Motion><ButtonRelease-1>',
+                       self.current_tab.capture_highlighted_text)
+        # Bind highlight tab to button.
+        self.clipboard_append(self.current_tab.text_selected.get())
+        # Allow paste between tabs.
+
+    @log.log_function
+    def tab_cut(self):
+        """
+        Cut selected text.
+        """
+        self.tab_copy()
+        # Copy highlighted text.
+        self.current_tab.text.delete(tk.SEL_FIRST, tk.SEL_LAST)
+        # Delete highlighted text.
+
+    @log.log_function
+    def tab_paste(self):
+        """
+        Paste text from the clipboard.
+        """
+        clipboard_text = self.clipboard_get()
+        self.current_tab.text.insert(tk.INSERT, clipboard_text)
+
+    @log.log_function
     def menu(self):
         """
         Add top bar menu ribbon.
@@ -160,6 +191,20 @@ class MainWindow(tk.Tk):
         self.file_menu.add_command(label="Quit", command=self.quit)
 
         self.menu.add_cascade(label="File", menu=self.file_menu)
+
+        self.config(menu=self.menu)
+
+        """Menu for edits:"""
+        self.edit_menu = tk.Menu(self.menu)
+
+        self.edit_menu.add_command(label="Undo", command=self.current_tab.text.edit_undo)
+        self.edit_menu.add_command(label="Redo", command=self.current_tab.text.edit_redo)
+        self.edit_menu.add_separator()
+        self.edit_menu.add_command(label="Cut", command=self.tab_cut)
+        self.edit_menu.add_command(label="Copy", command=self.tab_copy)
+        self.edit_menu.add_command(label="Paste", command=self.tab_paste)
+
+        self.menu.add_cascade(label="Edit", menu=self.edit_menu)
 
         self.config(menu=self.menu)
 
