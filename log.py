@@ -4,7 +4,7 @@ import functools
 import os
 
 
-def log_setup(logfile_name = 'better_writing_log', logfile_loc = False,
+def log_setup(logfile_name = 'clay_log', logfile_loc = False,
               loglevel = logging.DEBUG):
     """
     Set up logger.
