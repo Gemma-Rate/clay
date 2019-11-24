@@ -37,6 +37,9 @@ class MainWindow(tk.Tk):
         self.tab_no = None
         # Empty attributes to fill later.
 
+        self.store_image_copies = []
+        # Store copy of images to avoid garbage collection in functions.
+
         self.tab_size = 15
 
     @log.log_function
@@ -56,7 +59,8 @@ class MainWindow(tk.Tk):
         self.menu_frame.grid(row=0, sticky="ew")
 
         """Paned window split:"""
-        self.panes = tk.PanedWindow(self.master, orient ='horizontal')
+        self.panes = tk.PanedWindow(self.master, orient ='horizontal',
+                                    showhandle=True)
         self.panes.grid(row=0, sticky="ew")
 
         """Make notebook for tabs:"""
@@ -72,19 +76,34 @@ class MainWindow(tk.Tk):
         # Make a text box with this tab.
 
         """Menu buttons for tabs:"""
-        self.add_button(self.highlight_word_types, 4, 1, 'H', self.panes, width=2,
-                        further_text='Highlight word types')
+        img_classify = tk.PhotoImage(file='icons//classify_text.png')
+        self.add_button(self.classify_word_types, 4, 1, self.panes,
+                        further_text='Classify word types',
+                        image=img_classify)
 
-        self.add_button(self.remove_formatting, 5, 1, 'R', self.panes, width=2,
-                        further_text='Remove formatting')
-        self.add_button(self.similarity_user_highlight, 6, 1, 's1', self.panes, width=2)
-        self.add_button(self.similarity_all, 7, 1, 's2', self.panes, width=2)
+        img_formatting = tk.PhotoImage(file='icons//remove_formatting.png')
+        self.add_button(self.remove_formatting, 5, 1, self.panes,
+                        further_text='Remove formatting',
+                        image=img_formatting)
 
-        self.add_button(self.new_tab, 3, 1, '+', self.panes, width=2,
+        img_s_duo = tk.PhotoImage(file='icons//similarity_duo.png')
+        self.add_button(self.similarity_user_highlight, 6, 1, self.panes,
+                        further_text='Similarity between highlighted texts',
+                        image=img_s_duo)
+
+        img_s_all = tk.PhotoImage(file='icons//similarity_multi.png')
+        self.add_button(self.similarity_all, 7, 1, self.panes,
+                        further_text='Similarity between all data',
+                        image=img_s_all)
+
+        img_open_tab = tk.PhotoImage(file='icons//open_tab.png')
+        self.add_button(self.new_tab, 3, 1, self.panes, image=img_open_tab,
                         further_text='Open new tab')
         # Create new tab when pressing the new tab button.
-        self.add_button(self.close_tab, 0, 1, 'x', self.panes, width=2,
-                        further_text='Close current tab')
+        img_close_tab = tk.PhotoImage(file='icons//close_tab.png')
+        self.add_button(self.close_tab, 0, 1, self.panes,
+                        further_text='Close current tab',
+                        image=img_close_tab)
         # Remove current tab when pressing the button.
         self.parent_tabs.enable_traversal()
         # Allow tab switching via keyboard.
@@ -247,6 +266,13 @@ class MainWindow(tk.Tk):
 
         self.menu.add_cascade(label='Highlights', menu=self.highlight_menu)
 
+        """Menu for settings"""
+        self.settings_menu = tk.Menu(self.menu)
+
+        self.menu.add_cascade(label="Settings", menu=self.settings_menu)
+
+        self.config(menu=self.menu)
+
 
     @log.log_function
     def new_tab(self, event=None):
@@ -309,12 +335,16 @@ class MainWindow(tk.Tk):
         # Get current tab (for open/closing functions).
 
     @log.log_function
-    def add_button(self, to_bind, col, row, text, paneloc, width=1,
-                   stick='NE', further_text=None):
+    def add_button(self, to_bind, col, row, paneloc, width=1,
+                   stick='NE', further_text=None, text=None,
+                   image=None):
         """
         Function for generating new buttons conveniently.
         """
-        button = tk.ttk.Button(paneloc, text=text, width=width)
+        button = tk.ttk.Button(paneloc, text=text, image=image,
+                               width=width)
+        if image:
+            button.image = image
         button.grid(column=col, row=row, sticky=stick)
         # Add a button to do the callback.
         button.bind('<Button-1>', to_bind)
@@ -331,15 +361,22 @@ class MainWindow(tk.Tk):
         Add scroll buttons to the parent_tabs notebook if there are too many
         tabs.
         """
-
-        scroll_tab_l = tk.ttk.Button(self.panes, text='<', width=2)
+        img_scroll_l = tk.PhotoImage(file='icons//scroll_left.png')
+        scroll_tab_l = tk.ttk.Button(self.panes, image=img_scroll_l)
         scroll_tab_l.grid(column=1, row=1, sticky='NE')
-        scroll_tab_r = tk.ttk.Button(self.panes, text='>', width=2)
+        self.store_image_copies.append(img_scroll_l)
+
+        img_scroll_r = tk.PhotoImage(file='icons//scroll_right.png')
+        scroll_tab_r = tk.ttk.Button(self.panes, image=img_scroll_r)
         scroll_tab_r.grid(column=2, row=1, sticky='NE')
+        self.store_image_copies.append(img_scroll_r)
         # Add scroll buttons.
+
         scroll_tab_l.bind('<Button-1>', self.scroll_tab_left)
         scroll_tab_r.bind('<Button-1>', self.scroll_tab_right)
         # Scroll to left or right tab.
+
+
 
     @log.log_function
     def scroll_tab_left(self, event=None):
@@ -420,11 +457,11 @@ class MainWindow(tk.Tk):
             # Scroll left to make room for the new tab.
 
     @log.log_function
-    def highlight_word_types(self, event):
+    def classify_word_types(self, event):
         """
         Wrapper to highlight words in a text box of a tab.
         """
-        self.current_tab.highlight_word_types(self.toggle_pos)
+        self.current_tab.classify_word_types(self.toggle_pos)
 
     @log.log_function
     def remove_formatting(self, event):
@@ -491,6 +528,6 @@ class MainWindow(tk.Tk):
         """
         Display explanation of menu button names and outputs from analysis.
         """
-        tip = tp.ToolTipDisplay(widget, text)
+        tip = tp.ToolTipDisplay(widget, text, self)
         tip.bind_to()
 

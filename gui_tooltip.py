@@ -17,13 +17,14 @@ class ToolTipDisplay(tk.Frame):
 
     """
 
-    def __init__(self, widget, info_text):
+    def __init__(self, widget, info_text, root_window):
         tk.Frame.__init__(self)
 
         self.text = tk.Label(self, text=info_text, background='yellow')
         self.text.grid(column=0, row=0, sticky='EW')
 
         self.widget = widget
+        self.root = root_window
 
     @log.log_function
     def bind_to(self):
@@ -32,7 +33,7 @@ class ToolTipDisplay(tk.Frame):
         on rollover.
         """
         self.widget.bind('<Enter>', self.display)
-        self.widget.bind('<Leave>', self.remove)
+
 
     @log.log_function
     def display(self, event, xtime=2000):
@@ -45,9 +46,24 @@ class ToolTipDisplay(tk.Frame):
         self.widget.after(xtime, before_show.set, 1)
         self.widget.wait_variable(before_show)
 
-        self.place(in_=self.widget, y=-20, anchor='n',
-                   bordermode="outside")
-        # Place at cursor tip location.
+        widget_x1, widget_y1 = self.widget.winfo_rootx(), \
+                               self.widget.winfo_rooty()
+        widget_x2, widget_y2 = widget_x1+self.widget.winfo_width(), \
+                               widget_y1 + self.widget.winfo_height()
+        # Get widget corner positions.
+
+        cursor_x, cursor_y = self.root.winfo_pointerx(), \
+                             self.root.winfo_pointery()
+
+        if all([cursor_x>=widget_x1, cursor_y>=widget_y1,
+                cursor_x<=widget_x2, cursor_y<=widget_y2]):
+            # Ensure cursor is still in the widget.
+            self.place(in_=self.widget, y=-20, anchor='n',
+                       bordermode="outside")
+            # Place at cursor tip location.
+            self.widget.bind('<Leave>', self.remove)
+            # Now bind leave widget for when to remove tooltip.
+
 
     @log.log_function
     def remove(self, event):

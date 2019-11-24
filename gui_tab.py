@@ -3,6 +3,7 @@ GUI class for tab objects.
 """
 
 import tkinter as tk
+import functools
 import words_analysis_classes as wd
 import log
 
@@ -139,9 +140,9 @@ class TabTextBox(tk.Frame):
         self.text.insert(tk.END, ' ')
 
     @log.log_function
-    def highlight_word_types(self, to_include):
+    def classify_word_types(self, to_include):
         """
-        Highlight specific word types.
+        Classify and highlight specific word types.
         """
         self.raw = self.text.get('1.0', tk.END)
         # Get current text input.
@@ -238,9 +239,6 @@ class TabTextBox(tk.Frame):
         self.text.tag_add(tag_name, start, end)
         # Highlight the text in colour.
 
-        #self.text.tag_remove(tk.SEL_FIRST, tk.SEL_LAST)
-        # Deselect the text.
-
         return highlighted_by_cursor
 
     @log.log_function
@@ -250,6 +248,9 @@ class TabTextBox(tk.Frame):
         """
 
         wc = wd.WordSet(self.raw, self.md_core)
+
+        self.text.config(cursor='@icons//highlighter_tip.cur')
+        # Change cursor for highlights.
 
         if self.text.tag_ranges(tk.SEL):
             h1 = self.tag_highlighted_text(colour='blue', tag_name='h1')
@@ -261,9 +262,13 @@ class TabTextBox(tk.Frame):
         # Wait for next highlight.
         h2 = self.tag_highlighted_text(colour='red', tag_name='h2')
 
+        self.text.config(cursor='arrow')
+        # Return cursor to arrow.
+
         sim = wc.spacy_sim(h1, h2)
 
         self.text_selected = tk.StringVar()
+        # Reset the text selection variable.
 
         return sim
 
