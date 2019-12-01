@@ -284,9 +284,7 @@ class TabTextBox(tk.Frame):
         Turn highlighted words into buttons.
         """
         cursor_position = self.text.index(tk.INSERT)
-        c = self.text.get(cursor_position)
         # Get cursor position (as user clicking gives this location).
-        # Then get closest character!
 
         for t, v in zip(self.highlighted_text_list.keys(),
                         self.highlighted_text_list.values()):
