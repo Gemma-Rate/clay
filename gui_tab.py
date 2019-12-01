@@ -3,7 +3,6 @@ GUI class for tab objects.
 """
 
 import tkinter as tk
-import functools
 import words_analysis_classes as wd
 import log
 
@@ -50,7 +49,7 @@ class TabTextBox(tk.Frame):
         self.md_core = md
         # Classifier from Spacy, loaded in gui_windows.
 
-        self.highlighted_text_list =[]
+        self.highlighted_text_list = {}
         self.text_selected = tk.StringVar()
         # List of all currently highlighted text (currently empty).
 
@@ -159,15 +158,12 @@ class TabTextBox(tk.Frame):
                 try:
                     colour = wc.word_colours[t]
                     self.highlight_words(w, wc, name=t, color=colour)
-                    self.highlighted_text_list.append(w)
                 except KeyError:
                     pass
             else:
                 pass
         # Use the data save in the WordSet class to input the same
         # text, but highlighted.
-        list(set(self.highlighted_text_list))
-        # Only get unique elements.
 
     @log.log_function
     def highlight_words(self, keyword, wc, color='blue', name='highlight'):
@@ -197,6 +193,16 @@ class TabTextBox(tk.Frame):
                 start, index_pos = self.index_start_and_end(index_pos, w)
                 # Set index to begin highlighting at the end of the matched
                 # word.
+
+                if w in self.highlighted_text_list.keys():
+                    no_w = len([a for a in self.highlighted_text_list.keys()
+                                if a == w])
+                    # Number of occurences of w in keys.
+                    w = w+str(no_w+1)
+                    # Rename w to include occurences.
+
+                self.highlighted_text_list[w] = (start, index_pos)
+                # Add word and position bounds to dictionary.
 
     @log.log_function
     def scrollbar(self):
@@ -277,32 +283,27 @@ class TabTextBox(tk.Frame):
         """
         Turn highlighted words into buttons.
         """
-        index_pos = '1.0'
         cursor_position = self.text.index(tk.INSERT)
+        c = self.text.get(cursor_position)
         # Get cursor position (as user clicking gives this location).
+        # Then get closest character!
 
-        for t in self.highlighted_text_list:
+        for t, v in zip(self.highlighted_text_list.keys(),
+                        self.highlighted_text_list.values()):
 
-            reg_search = r'\y' + t + r'\y'
-            index_pos = self.text.search(reg_search, index_pos, stopindex="end",
-                                         regexp=True)
-            start, index_pos = self.index_start_and_end(index_pos, t)
-            # Search for position of the start of clicked word t.
-
-            start_f = float(start)
-            end_split_plus = index_pos.split('+')
-            # Split off plus.
-            end_split = end_split_plus[0].split('.')
-            # Split at .
-            end_f = float(str(int(end_split[0]))+'.'+
-                          str(int(end_split[1])+len(t)))
+            start_f = v[0].split('.')
+            end_f = int(start_f[1])+int(len(t))
+            end_f = float(start_f[0]+'.'+str(end_f))
+            # Convert end string from character addition to coordinate.
             cursor_f = float(cursor_position)
+            print(start_f, end_f, cursor_f)
             # Change the word start, end and cursor position into floats.
 
-            if (cursor_f > start_f) and (cursor_f < end_f):
+            if (cursor_f > float(v[0])) and (cursor_f < end_f):
                 # Select if cursor position falls between the start and end
                 # of the word.
-                self.colourise_text(t, 'snow', 'red', t, index_pos)
+                print(t, v, cursor_f, start_f, end_f)
+                self.colourise_text(t, 'snow', 'red', t, v[0])
                 # Add a highlight.
                 self.text_selected.set(t)
 
@@ -315,10 +316,16 @@ class TabTextBox(tk.Frame):
 
         self.text.bind("<Button 1>", self.get_highlighted_word_by_click)
 
+        self.text.config(cursor='@icons//hand_select.cur')
+        # Change cursor to click.
+
         self.wait_variable(self.text_selected)
         # Wait for next highlight.
 
         self.similarity_to_all_highlighted()
+
+        self.text.config(cursor='arrow')
+        # Return cursor to arrow.
 
         self.text.bind('<B1-Motion><ButtonRelease-1>',
                        self.capture_highlighted_text)
@@ -333,8 +340,6 @@ class TabTextBox(tk.Frame):
         """
         index_pos = '1.0'
         wc = wd.WordSet(self.raw, self.md_core)
-
-        print(self.text_selected.get())
 
         for s in self.highlighted_text_list:
             # Check to see which sentence is being highlighted.

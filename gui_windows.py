@@ -376,8 +376,6 @@ class MainWindow(tk.Tk):
         scroll_tab_r.bind('<Button-1>', self.scroll_tab_right)
         # Scroll to left or right tab.
 
-
-
     @log.log_function
     def scroll_tab_left(self, event=None):
         """
@@ -496,7 +494,7 @@ class MainWindow(tk.Tk):
 
         s_percent = 1-similarity/0.75
 
-        s_text = 'Content similarity: {}\nRecommend evaluation: {}'.format(similarity, s_percent)
+        s_text = 'Content similarity: {0:.3f}\nRecommend evaluation: {0:.3f}'.format(similarity, s_percent)
 
         sim_label = tk.ttk.Label(self.similarity_frame,
                                  text=s_text)
@@ -508,6 +506,7 @@ class MainWindow(tk.Tk):
         Calculate similaritity between the highlighted sentence and
         all sentences.
         """
+        print('activated')
         self.current_tab.bind_to_selection()
 
     @log.log_function
