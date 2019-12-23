@@ -217,7 +217,6 @@ class TabTextBox(tk.Frame):
         self.text.config(yscrollcommand=scrollbar.set)
         scrollbar.config(command=self.text.yview)
 
-
     @log.log_function
     def capture_highlighted_text(self, event):
         """
@@ -225,7 +224,6 @@ class TabTextBox(tk.Frame):
         """
         highlighted_by_cursor = self.text.get(tk.SEL_FIRST, tk.SEL_LAST)
         self.text_selected.set(highlighted_by_cursor)
-
 
     @log.log_function
     def tag_highlighted_text(self, colour='blue', tag_name='highlight'):
@@ -236,7 +234,7 @@ class TabTextBox(tk.Frame):
         highlighted_by_cursor = self.text.get(tk.SEL_FIRST, tk.SEL_LAST)
         # Get text currently highlighted by cursor.
         start = self.text.search(highlighted_by_cursor, '1.0',
-                                     stopindex="end", count=1)
+                                 stopindex="end", count=1)
         # Start point of text.
         end = self.text.index(tk.INSERT)
 
@@ -294,13 +292,11 @@ class TabTextBox(tk.Frame):
             end_f = float(start_f[0]+'.'+str(end_f))
             # Convert end string from character addition to coordinate.
             cursor_f = float(cursor_position)
-            print(start_f, end_f, cursor_f)
-            # Change the word start, end and cursor position into floats.
+            # Change the word end and cursor position into floats.
 
-            if (cursor_f > float(v[0])) and (cursor_f < end_f):
+            if all([cursor_f > float(v[0]), cursor_f < end_f]):
                 # Select if cursor position falls between the start and end
                 # of the word.
-                print(t, v, cursor_f, start_f, end_f)
                 self.colourise_text(t, 'snow', 'red', t, v[0])
                 # Add a highlight.
                 self.text_selected.set(t)
@@ -312,7 +308,7 @@ class TabTextBox(tk.Frame):
         binding and rebind it to capture sentences.
         """
 
-        self.text.bind("<Button 1>", self.get_highlighted_word_by_click)
+        hb = self.text.bind("<Button 1>", self.get_highlighted_word_by_click)
 
         self.text.config(cursor='@icons//hand_select.cur')
         # Change cursor to click.
@@ -325,6 +321,8 @@ class TabTextBox(tk.Frame):
         self.text.config(cursor='arrow')
         # Return cursor to arrow.
 
+        self.text.unbind("<Button 1>", funcid = hb)
+
         self.text.bind('<B1-Motion><ButtonRelease-1>',
                        self.capture_highlighted_text)
         # Return text
@@ -336,20 +334,22 @@ class TabTextBox(tk.Frame):
         Get similarity of the highlighted word to all other
         highlighted words.
         """
-        index_pos = '1.0'
         wc = wd.WordSet(self.raw, self.md_core)
 
-        for s in self.highlighted_text_list:
+        for k, v in zip(self.highlighted_text_list.keys(),
+                        self.highlighted_text_list.values()):
             # Check to see which sentence is being highlighted.
 
-            sim = wc.spacy_sim(self.text_selected.get(), s)
-            r, g, b = int(17/10), int(30/10), 108
-            b = int((sim * b)/10)
-            color = "#{:02d}{:02d}{:02d}".format(r,g,b)
-            # Colour or highlight, based on similarity.
+            s = ''.join(['' if i.isdigit() else i for i in k])
+            # Remove numeric elements for words appearing twice.
 
-            self.colourise_text(s, 'snow', color, s, index_pos)
-            start, index_pos = self.index_start_and_end(index_pos, s)
+            sim = wc.spacy_sim(self.text_selected.get(), s)
+            r, g, b = int(17/10), int(30/10), 255
+            b = int((abs(sim) * b))
+            color = "#{:02x}{:02x}{:02x}".format(r,g,b)
+            # Colour or highlight, based on similarity.
+            print(s, color, sim, v)
+            self.colourise_text(s, 'snow', color, s, v[0])
             # Highlight text.
 
 

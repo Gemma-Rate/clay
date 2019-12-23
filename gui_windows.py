@@ -468,6 +468,8 @@ class MainWindow(tk.Tk):
         """
         self.current_tab.text.delete('1.0', 'end-1c')
         self.current_tab.text.insert(tk.END, self.current_tab.raw)
+        self.current_tab.highlighted_text_list = {}
+        # Erase saved text list.
 
     @log.log_function
     def highlight_checkbox_control(self):
@@ -506,7 +508,6 @@ class MainWindow(tk.Tk):
         Calculate similaritity between the highlighted sentence and
         all sentences.
         """
-        print('activated')
         self.current_tab.bind_to_selection()
 
     @log.log_function

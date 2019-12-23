@@ -34,7 +34,6 @@ class ToolTipDisplay(tk.Frame):
         """
         self.widget.bind('<Enter>', self.display)
 
-
     @log.log_function
     def display(self, event, xtime=2000):
         """
