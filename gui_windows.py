@@ -245,18 +245,25 @@ class MainWindow(tk.Tk):
         """Menu for highlights"""
         self.highlight_menu = tk.Menu(self.menu)
 
-        self.toggle_name_full = ['Adjective', 'Verb']
+        self.toggle_name_full = ['Adjective', 'Verb', 'Noun',
+                                 'Proper noun', 'Adverb', 'Determiner',
+                                 'Preposition/conjunction/subordinating',
+                                 'Particle', 'Numerical']
         # List of toggle highlight names.
         self.toggle_pos_full = [('RB', 'RBR','RBS'), ('VB', 'VBD', 'VBG',
-                                 'VBN', 'VBP', 'VBZ')]
+                                 'VBN', 'VBP', 'VBZ'), ('NN', 'NNS'), ('NNP',
+                                 'NNPS'), ('JJ', 'JJR', 'JJS'), ('DT',),
+                                 ('IN',), ('RP',), ('CD',)]
         # List of word tag groups corresponding to toggle_list names.
         self.toggle_pos = [('RB', 'RBR','RBS'), ('VB', 'VBD', 'VBG',
-                                 'VBN', 'VBP', 'VBZ')]
+                            'VBN', 'VBP', 'VBZ'), ('NN', 'NNS'), ('NNP',
+                            'NNPS'), ('JJ', 'JJR', 'JJS'), ('DT',),
+                            ('IN',), ('RP',), ('CD',)]
         # Pos tags currently set to be highlighted.
         self.set_to_on = [tk.IntVar(value=1) for t in self.toggle_name_full]
         # Variable list for checkboxes.
 
-        for tl, tg in zip(self.toggle_name_full, self.set_to_on): #, self.set_to_on):
+        for tl, tg in zip(self.toggle_name_full, self.set_to_on):
             # Start by setting all selections to on.
             self.highlight_menu.add_checkbutton(label=tl, onvalue=1,
                                                 offvalue=0,

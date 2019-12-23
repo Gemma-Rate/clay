@@ -47,8 +47,8 @@ class WordSet(object):
                              'NN':'red', 'NNS':'red', 'NNP':'red4',
                              'NNPS':'red4', 'JJ':'green', 'JJR':'green',
                              'JJS':'green', 'DT':'grey', 'IN':'purple1',
-                             'RB':'yellow', 'RBR':'yellow','RBS':'yellow'
-                             }
+                             'RB':'yellow', 'RBR':'yellow','RBS':'yellow',
+                             'RP':'dark orange', 'CD':'cyan3'}
         self.md_core = md
 
 
@@ -120,6 +120,13 @@ class WordSet(object):
 
         return sim
 
+    @log.log_function
+    def sentiment(self):
+        """
+        Positive and negative sentiment polarity for
+        :return:
+        """
+        pass
 
     @log.log_function
     def wordnet_similar(self, k=9):

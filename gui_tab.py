@@ -184,7 +184,7 @@ class TabTextBox(tk.Frame):
         # Store indices of punctuation marks to delete extra spaces.
         index_pos = '1.0'
         for w in wc.token:
-            if w.lower() == keyword:
+            if w.lower() == keyword.lower():
                 reg_search = r'\y'+w+r'\y'
                 index_pos = self.text.search(reg_search, index_pos, regexp=True,
                                              stopindex='end')
@@ -196,7 +196,7 @@ class TabTextBox(tk.Frame):
 
                 if w in self.highlighted_text_list.keys():
                     no_w = len([a for a in self.highlighted_text_list.keys()
-                                if a == w])
+                                if w in a])
                     # Number of occurences of w in keys.
                     w = w+str(no_w+1)
                     # Rename w to include occurences.
@@ -348,7 +348,6 @@ class TabTextBox(tk.Frame):
             b = int((abs(sim) * b))
             color = "#{:02x}{:02x}{:02x}".format(r,g,b)
             # Colour or highlight, based on similarity.
-            print(s, color, sim, v)
             self.colourise_text(s, 'snow', color, s, v[0])
             # Highlight text.
 
