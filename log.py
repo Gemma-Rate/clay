@@ -2,6 +2,7 @@
 import logging
 import functools
 import os
+import time
 
 
 def log_setup(logfile_name = 'clay_log', logfile_loc = False,
@@ -53,3 +54,31 @@ def log_function(fun):
 
         return output
     return wrapper_log_function
+
+
+def profiler(fun):
+    """
+    Decorator to add time profiling to functions.
+
+    Parameters
+    ----------
+    fun : python function object
+        Function input.
+    """
+
+    @functools.wraps(fun)
+    def wrapper_profile_function(*args, **kwargs):
+    # Set up a wrapper of the function that takes args and key word
+    # args.
+        logger = logging.getLogger("debug-tracking")
+        start = time.time()
+        output = fun(*args, **kwargs)
+        end = time.time()
+
+        runtime = end-start
+        print('Function {} ran in {}s.'.format(fun.__name__, runtime))
+
+        logger.info('Function {} ran in {}s.'.format(fun.__name__, runtime))
+
+        return output
+    return wrapper_profile_function
