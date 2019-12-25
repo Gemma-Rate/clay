@@ -4,6 +4,8 @@ Classes for analysing prose itself.
 import nltk
 import re
 import log
+import highlight_dictionary as hd
+from nltk.corpus import sentiwordnet as swn
 
 # Highlighting.
 # Content similarity.
@@ -42,13 +44,7 @@ class WordSet(object):
         self.processed = self.word_token(text)
         self.sentences = nltk.sent_tokenize(text)
         self.pos = None
-        self.word_colours = {'VB':'blue', 'VBD':'blue', 'VBG':'blue',
-                             'VBN':'blue', 'VBP':'blue', 'VBZ':'blue',
-                             'NN':'red', 'NNS':'red', 'NNP':'red4',
-                             'NNPS':'red4', 'JJ':'green', 'JJR':'green',
-                             'JJS':'green', 'DT':'grey', 'IN':'purple1',
-                             'RB':'yellow', 'RBR':'yellow','RBS':'yellow',
-                             'RP':'dark orange', 'CD':'cyan3'}
+        self.word_colours = hd.highlight_nltk
         self.md_core = md
 
 
@@ -121,12 +117,15 @@ class WordSet(object):
         return sim
 
     @log.log_function
-    def sentiment(self):
+    def sentiment(self, words_in):
         """
-        Positive and negative sentiment polarity for
-        :return:
+        Positive and negative sentiment polarity for selected word.
         """
-        pass
+        s_set = swn.senti_synset(words_in)
+        pos, neg = s_set.pos_score(), s_set.neg_score()
+        obj = s_set.obj_score()
+
+        return pos, neg, obj
 
     @log.log_function
     def wordnet_similar(self, k=9):

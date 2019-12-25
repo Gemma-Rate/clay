@@ -297,13 +297,19 @@ class TabTextBox(tk.Frame):
                         self.highlighted_text_list.values()):
 
             start_f = v[0].split('.')
-            end_f = int(start_f[1])+int(len(t))
-            end_f = float(start_f[0]+'.'+str(end_f))
+            # Starting index.
+            to_add = v[1].split('+')
+            to_add = to_add[1]
+            to_add = to_add[:-1]
+            # Number of characters to add.
+            end_f = str(int(start_f[1])+int(to_add))
             # Convert end string from character addition to coordinate.
-            cursor_f = float(cursor_position)
+            cursor_f = cursor_position.split('.')
             # Change the word end and cursor position into floats.
 
-            if all([cursor_f > float(v[0]), cursor_f < end_f]):
+            if all([int(cursor_f[0]) == int(start_f[0]),
+                    int(cursor_f[1]) < int(end_f),
+                    int(cursor_f[1]) > int(start_f[1])]):
                 # Select if cursor position falls between the start and end
                 # of the word.
                 self.colourise_text(t, 'snow', 'red', t, v[0])
@@ -331,9 +337,11 @@ class TabTextBox(tk.Frame):
         # Return cursor to arrow.
 
         self.text.unbind("<Button 1>", funcid = hb)
+        self.text_selected = tk.StringVar()
+        # Reset selected to empty.
 
-        self.text.bind('<B1-Motion><ButtonRelease-1>',
-                       self.capture_highlighted_text)
+        #self.text.bind('<B1-Motion><ButtonRelease-1>',
+        #               self.capture_highlighted_text)
         # Return text
 
     @log.log_function
@@ -352,11 +360,17 @@ class TabTextBox(tk.Frame):
             # Remove numeric elements for words appearing twice.
             sim = wc.spacy_sim(self.text_selected.get(), s)
 
-            r, g, b = int(17/10), int(30/10), 255
-            b = int((abs(sim) * b))
+            r, g, b = int(17/10), 255, 255
+            g, b = int((abs(sim) * g)), int((abs(sim) * b))
             color = "#{:02x}{:02x}{:02x}".format(r,g,b)
             # Colour or highlight, based on similarity.
             self.colourise_text(s, 'snow', color, s, v[0])
             # Highlight text.
+
+    @log.log_function
+    def sentiment_analysis(self):
+        """
+        Highlight positive and negative sentiment for
+        """
 
 

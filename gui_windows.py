@@ -248,17 +248,23 @@ class MainWindow(tk.Tk):
         self.toggle_name_full = ['Adjective', 'Verb', 'Noun',
                                  'Proper noun', 'Adverb', 'Determiner',
                                  'Preposition/conjunction/subordinating',
-                                 'Particle', 'Numerical']
+                                 'Particle', 'Numerical', 'To',
+                                 'Possessive', 'Pronoun', 'Modal', 'Particle',
+                                 'Existential', 'Foreign Word']
         # List of toggle highlight names.
         self.toggle_pos_full = [('RB', 'RBR','RBS'), ('VB', 'VBD', 'VBG',
                                  'VBN', 'VBP', 'VBZ'), ('NN', 'NNS'), ('NNP',
-                                 'NNPS'), ('JJ', 'JJR', 'JJS'), ('DT',),
-                                 ('IN',), ('RP',), ('CD',)]
+                                 'NNPS'), ('JJ', 'JJR', 'JJS'), ('DT', 'WDT', 'PDT'),
+                                 ('IN', 'CC'), ('RP',), ('CD',), ('TO',),
+                                 ('POS', 'PRP$', 'WP$'), ('PRP', 'WP'), ('MD',),
+                                 ('RP',), ('EX',), ('FW',)]
         # List of word tag groups corresponding to toggle_list names.
         self.toggle_pos = [('RB', 'RBR','RBS'), ('VB', 'VBD', 'VBG',
                             'VBN', 'VBP', 'VBZ'), ('NN', 'NNS'), ('NNP',
-                            'NNPS'), ('JJ', 'JJR', 'JJS'), ('DT',),
-                            ('IN',), ('RP',), ('CD',)]
+                            'NNPS'), ('JJ', 'JJR', 'JJS'), ('DT', 'WDT', 'PDT'),
+                            ('IN', 'CC'), ('RP',), ('CD',), ('TO',),
+                            ('POS', 'PRP$', 'WP$'), ('PRP', 'WP'), ('MD',),
+                            ('RP',), ('EX',), ('FW',)]
         # Pos tags currently set to be highlighted.
         self.set_to_on = [tk.IntVar(value=1) for t in self.toggle_name_full]
         # Variable list for checkboxes.
