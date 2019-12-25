@@ -153,7 +153,7 @@ class TabTextBox(tk.Frame):
         flatten = [x for y in to_include for x in y]
         # Get rid of tupples.
 
-        for w, t in wc.pos:
+        for w, t in list(set(wc.pos)):
             if t in flatten:
                 try:
                     colour = wc.word_colours[t]
@@ -183,8 +183,12 @@ class TabTextBox(tk.Frame):
         """
         # Store indices of punctuation marks to delete extra spaces.
         index_pos = '1.0'
+
+        repeated_w = {}
+        #Record words which are repeated.
+
         for w in wc.token:
-            if w.lower() == keyword.lower():
+            if w == keyword:
                 reg_search = r'\y'+w+r'\y'
                 index_pos = self.text.search(reg_search, index_pos, regexp=True,
                                              stopindex='end')
@@ -194,11 +198,16 @@ class TabTextBox(tk.Frame):
                 # Set index to begin highlighting at the end of the matched
                 # word.
 
-                if w in self.highlighted_text_list.keys():
-                    no_w = len([a for a in self.highlighted_text_list.keys()
-                                if w in a])
-                    # Number of occurences of w in keys.
-                    w = w+str(no_w+1)
+                # Number of occurences of w in keys:
+                if w in repeated_w.keys():
+                    # Subsequent repeats.
+                    repeated_w[w] += 1
+                    w = w + str(repeated_w[w])
+                    # Rename w to include occurences.
+                elif w in self.highlighted_text_list.keys():
+                    repeated_w[w] = 2
+                    # First repeat.
+                    w = w + str(repeated_w[w])
                     # Rename w to include occurences.
 
                 self.highlighted_text_list[w] = (start, index_pos)
@@ -327,7 +336,6 @@ class TabTextBox(tk.Frame):
                        self.capture_highlighted_text)
         # Return text
 
-
     @log.log_function
     def similarity_to_all_highlighted(self):
         """
@@ -342,8 +350,8 @@ class TabTextBox(tk.Frame):
 
             s = ''.join(['' if i.isdigit() else i for i in k])
             # Remove numeric elements for words appearing twice.
-
             sim = wc.spacy_sim(self.text_selected.get(), s)
+
             r, g, b = int(17/10), int(30/10), 255
             b = int((abs(sim) * b))
             color = "#{:02x}{:02x}{:02x}".format(r,g,b)
