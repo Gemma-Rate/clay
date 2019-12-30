@@ -100,11 +100,18 @@ class MainWindow(tk.Tk):
         self.add_button(self.new_tab, 3, 1, self.panes, image=img_open_tab,
                         further_text='Open new tab')
         # Create new tab when pressing the new tab button.
+
         img_close_tab = tk.PhotoImage(file='icons//close_tab.png')
         self.add_button(self.close_tab, 0, 1, self.panes,
                         further_text='Close current tab',
                         image=img_close_tab)
         # Remove current tab when pressing the button.
+
+        img_sentiment = tk.PhotoImage(file='icons//sentiment_analysis.png')
+        self.add_button(self.sentiment_analysis, 8, 1, self.panes,
+                        further_text='Sentiment analysis',
+                        image=img_sentiment)
+        # Sentiment analysis button.
         self.parent_tabs.enable_traversal()
         # Allow tab switching via keyboard.
 
@@ -364,9 +371,9 @@ class MainWindow(tk.Tk):
         # Perform callback when pressing the button.
 
         if further_text:
-            self.hover_tooltip(button, further_text)
+            self.hover_tooltip_widget(button, further_text)
         else:
-            self.hover_tooltip(button, text)
+            self.hover_tooltip_widget(button, text)
 
     @log.log_function
     def add_tab_scroll(self):
@@ -534,13 +541,19 @@ class MainWindow(tk.Tk):
                                         width=3)
                 tab_add.grid(column=x, row=y, sticky='NE')
                 # Add a button to open a new tab.
-                #tab_add.bind('<Button-1>', self.select_highlighted_text)
 
     @log.log_function
-    def hover_tooltip(self, widget, text):
+    def hover_tooltip_widget(self, widget, text):
         """
         Display explanation of menu button names and outputs from analysis.
         """
         tip = tp.ToolTipDisplay(widget, text, self)
-        tip.bind_to()
+        tip.bind_to_widget()
 
+    @log.log_function
+    def sentiment_analysis(self, event):
+        """
+        Perform sentiment analysis on text.
+        """
+
+        self.current_tab.sentiment_analysis()

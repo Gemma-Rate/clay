@@ -24,7 +24,8 @@ class TabTextBox(tk.Frame):
         Vertical size of the tab window in pixels.
     tab_name: str
         Name of the tab.
-    md_core : Spacy classifier object
+    md : Spacy classifier object
+        Word analysis class.
 
 
     Class methods
@@ -123,30 +124,14 @@ class TabTextBox(tk.Frame):
         return start_index, end_index
 
     @log.log_function
-    def insert_spaces(self):
-        """
-        Insert space into a text block.
-        """
-        position = self.text.index(tk.INSERT)
-        last_insert = self.text.get('1.0', position)[-1]
-        punctuation = ['.', ',', ';', ':']
-
-        if last_insert in punctuation:
-            # Take out the space before punctuation.
-            delete_location = position+'-2c'
-            self.text.delete(delete_location)
-
-        self.text.insert(tk.END, ' ')
-
-    @log.log_function
     def classify_word_types(self, to_include):
         """
         Classify and highlight specific word types.
         """
         self.raw = self.text.get('1.0', tk.END)
         # Get current text input.
+
         wc = wd.WordSet(self.raw, self.md_core)
-        # Make a class of the data.
         wc.label_word_types()
         # Label word types.
 
@@ -278,7 +263,7 @@ class TabTextBox(tk.Frame):
         self.text.config(cursor='arrow')
         # Return cursor to arrow.
 
-        sim = wc.spacy_sim(h1, h2)
+        sim, color = wc.spacy_sim(h1, h2)
 
         self.text_selected = tk.StringVar()
         # Reset the text selection variable.
@@ -340,16 +325,13 @@ class TabTextBox(tk.Frame):
         self.text_selected = tk.StringVar()
         # Reset selected to empty.
 
-        #self.text.bind('<B1-Motion><ButtonRelease-1>',
-        #               self.capture_highlighted_text)
-        # Return text
-
     @log.log_function
     def similarity_to_all_highlighted(self):
         """
         Get similarity of the highlighted word to all other
         highlighted words.
         """
+
         wc = wd.WordSet(self.raw, self.md_core)
 
         for k, v in zip(self.highlighted_text_list.keys(),
@@ -358,19 +340,35 @@ class TabTextBox(tk.Frame):
 
             s = ''.join(['' if i.isdigit() else i for i in k])
             # Remove numeric elements for words appearing twice.
-            sim = wc.spacy_sim(self.text_selected.get(), s)
+            sim, color = wc.spacy_sim(self.text_selected.get(), s)
 
-            r, g, b = int(17/10), 255, 255
-            g, b = int((abs(sim) * g)), int((abs(sim) * b))
-            color = "#{:02x}{:02x}{:02x}".format(r,g,b)
-            # Colour or highlight, based on similarity.
             self.colourise_text(s, 'snow', color, s, v[0])
             # Highlight text.
 
     @log.log_function
     def sentiment_analysis(self):
         """
-        Highlight positive and negative sentiment for
+        Highlight positive and negative sentiment for all words or
+        all highlighted words.
         """
+
+        wc = wd.WordSet(self.raw, self.md_core)
+
+        if self.highlighted_text_list:
+            # Highlight only selected words.
+
+            for s, v in zip(self.highlighted_text_list.keys(),
+                            self.highlighted_text_list.values()):
+
+                pos, neg, obj, color = wc.sentiment(s)
+                self.colourise_text(s, 'snow', color, s, v[0])
+                # Highlight text.
+        else:
+            # Highlight all words.
+            pos, neg, obj, color = wc.sentiment_all()
+
+            for c, k in zip(color, wc.token):
+                self.highlight_words(k, wc, color=c, name='highlight')
+
 
 

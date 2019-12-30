@@ -95,6 +95,7 @@ class WordSet(object):
         List of tokenised data.
 
         """
+        print(data)
 
         if no_punctuation:
             data = re.sub(r"[^\w\s]", ' ', data)
@@ -106,15 +107,21 @@ class WordSet(object):
 
         return datatoken
 
+
     @log.log_function
     def spacy_sim(self, s1, s2):
         """
-        Get similarity between vectors.
+        Get similarity between vectors and highlight colour.
         """
         s1, s2 = self.md_core(s1), self.md_core(s2)
         sim = s1.similarity(s2)
 
-        return sim
+        r, g, b = int(17 / 10), 255, 255
+        g, b = int((abs(sim) * g)), int((abs(sim) * b))
+        color = "#{:02x}{:02x}{:02x}".format(r, g, b)
+        # Colour or highlight, based on similarity.
+
+        return sim, color
 
     @log.log_function
     def sentiment(self, words_in):
@@ -125,7 +132,25 @@ class WordSet(object):
         pos, neg = s_set.pos_score(), s_set.neg_score()
         obj = s_set.obj_score()
 
-        return pos, neg, obj
+        r, g, b = 255*neg, 255*pos, 255*obj
+        color = "#{:02x}{:02x}{:02x}".format(r, g, b)
+
+        return pos, neg, obj, color
+
+    @log.log_function
+    def sentiment_all(self):
+        """
+        Positive and negative sentiment polarity for selected word.
+        """
+        pos_list, neg_list, obj_list, color_list = [], [], [], []
+
+        for s in self.token:
+            pos, neg, obj, color = self.sentiment(s)
+
+            pos_list.append(pos), neg_list.append(neg)
+            obj_list.append(obj), color_list.append(color)
+
+        return pos_list, neg_list, obj_list, color_list
 
     @log.log_function
     def wordnet_similar(self, k=9):

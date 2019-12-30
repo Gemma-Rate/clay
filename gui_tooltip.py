@@ -27,17 +27,17 @@ class ToolTipDisplay(tk.Frame):
         self.root = root_window
 
     @log.log_function
-    def bind_to(self):
+    def bind_to_widget(self):
         """
         Bind entry and exit to the widget, so that the tooltip is activated
         on rollover.
         """
-        self.widget.bind('<Enter>', self.display)
+        self.widget.bind('<Enter>', self.display_widget)
 
     @log.log_function
-    def display(self, event, xtime=2000):
+    def display_widget(self, event, xtime=2000):
         """
-        Display the text label on rollover.
+        Display the text label on rollover of a widget.
         """
         before_show = tk.IntVar()
         # Variable to cause gui to wait for xtime seconds before showing the
@@ -70,3 +70,11 @@ class ToolTipDisplay(tk.Frame):
         Remove the text label after rollover.
         """
         self.place_forget()
+
+
+    @log.log_function
+    def display_text(self):
+        """
+        Display data over text in tab.
+        """
+        pass
