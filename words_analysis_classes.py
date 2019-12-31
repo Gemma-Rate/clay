@@ -5,6 +5,7 @@ import nltk
 import re
 import log
 import highlight_dictionary as hd
+import sentiwordnet_dictionary as sd
 from nltk.corpus import sentiwordnet as swn
 
 # Highlighting.
@@ -95,7 +96,6 @@ class WordSet(object):
         List of tokenised data.
 
         """
-        print(data)
 
         if no_punctuation:
             data = re.sub(r"[^\w\s]", ' ', data)
@@ -128,15 +128,28 @@ class WordSet(object):
         """
         Positive and negative sentiment polarity for selected word.
         """
-        s_set = swn.senti_synset(words_in)
-        pos, neg = s_set.pos_score(), s_set.neg_score()
-        obj = s_set.obj_score()
+        try:
+            pos_w = nltk.pos_tag([words_in])
+            pos_w = pos_w[0]
+            tag = sd.nltk_to_senti[pos_w[1]]
+            # Convert nltk tag to sentiwordnet tag.
 
-        r, g, b = 255*neg, 255*pos, 255*obj
-        color = "#{:02x}{:02x}{:02x}".format(r, g, b)
+            word_c = words_in+'.'+tag+'.01'
+
+            s_set = swn.senti_synset(word_c)
+            pos, neg = s_set.pos_score(), s_set.neg_score()
+            obj = s_set.obj_score()
+
+            r, g, b = int(255*neg), int(255*pos), int(255*obj)
+            color = "#{:02x}{:02x}{:02x}".format(r, g, b)
+
+        except:
+            pos, neg, obj = 0, 0, 0
+            color = "#{:02x}{:02x}{:02x}".format(255, 255, 255)
 
         return pos, neg, obj, color
 
+    @log.profiler
     @log.log_function
     def sentiment_all(self):
         """

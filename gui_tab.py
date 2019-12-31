@@ -151,7 +151,8 @@ class TabTextBox(tk.Frame):
         # text, but highlighted.
 
     @log.log_function
-    def highlight_words(self, keyword, wc, color='blue', name='highlight'):
+    def highlight_words(self, keyword, wc, color='blue',
+                        char_color= 'snow', name='highlight'):
         """
         Highlight specific words.
 
@@ -178,7 +179,7 @@ class TabTextBox(tk.Frame):
                 index_pos = self.text.search(reg_search, index_pos, regexp=True,
                                              stopindex='end')
                 # Search for text keyword as individual word.
-                self.colourise_text(w, 'snow', color, name, index_pos)
+                self.colourise_text(w, char_color, color, name, index_pos)
                 start, index_pos = self.index_start_and_end(index_pos, w)
                 # Set index to begin highlighting at the end of the matched
                 # word.
@@ -321,7 +322,7 @@ class TabTextBox(tk.Frame):
         self.text.config(cursor='arrow')
         # Return cursor to arrow.
 
-        self.text.unbind("<Button 1>", funcid = hb)
+        self.text.unbind("<Button 1>", funcid=hb)
         self.text_selected = tk.StringVar()
         # Reset selected to empty.
 
@@ -345,6 +346,7 @@ class TabTextBox(tk.Frame):
             self.colourise_text(s, 'snow', color, s, v[0])
             # Highlight text.
 
+    @log.profiler
     @log.log_function
     def sentiment_analysis(self):
         """
@@ -368,7 +370,11 @@ class TabTextBox(tk.Frame):
             pos, neg, obj, color = wc.sentiment_all()
 
             for c, k in zip(color, wc.token):
-                self.highlight_words(k, wc, color=c, name='highlight')
+                if color != '#ffffff':
+                    self.highlight_words(k, wc, color=c, name=k)
+                else:
+                    self.highlight_words(k, wc, color=c, char_color='black',
+                                         name=k)
 
 
 

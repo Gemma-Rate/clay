@@ -20,3 +20,4 @@ highlight_nltk = {'VB':'RoyalBlue3', 'VBD':'RoyalBlue3', 'VBG':'RoyalBlue3', # V
                   'TO' : 'dark slate gray', # To
                   'EX': 'sandy brown'} # Existential
                   # Highlight with nltk labelling.
+
