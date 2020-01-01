@@ -173,31 +173,32 @@ class TabTextBox(tk.Frame):
         repeated_w = {}
         #Record words which are repeated.
 
-        for w in wc.token:
-            if w == keyword:
-                reg_search = r'\y'+w+r'\y'
-                index_pos = self.text.search(reg_search, index_pos, regexp=True,
-                                             stopindex='end')
-                # Search for text keyword as individual word.
-                self.colourise_text(w, char_color, color, name, index_pos)
-                start, index_pos = self.index_start_and_end(index_pos, w)
-                # Set index to begin highlighting at the end of the matched
-                # word.
+        keywords = [keyword for w in wc.token if keyword == w]
 
-                # Number of occurences of w in keys:
-                if w in repeated_w.keys():
-                    # Subsequent repeats.
-                    repeated_w[w] += 1
-                    w = w + str(repeated_w[w])
-                    # Rename w to include occurences.
-                elif w in self.highlighted_text_list.keys():
-                    repeated_w[w] = 2
-                    # First repeat.
-                    w = w + str(repeated_w[w])
-                    # Rename w to include occurences.
+        for w in keywords:
+            reg_search = r'\y'+w+r'\y'
+            index_pos = self.text.search(reg_search, index_pos, regexp=True,
+                                         stopindex='end')
+            # Search for text keyword as individual word.
+            self.colourise_text(w, char_color, color, name, index_pos)
+            start, index_pos = self.index_start_and_end(index_pos, w)
+            # Set index to begin highlighting at the end of the matched
+            # word.
 
-                self.highlighted_text_list[w] = (start, index_pos)
-                # Add word and position bounds to dictionary.
+            # Number of occurences of w in keys:
+            if w in repeated_w.keys():
+                # Subsequent repeats.
+                repeated_w[w] += 1
+                w = w + str(repeated_w[w])
+                # Rename w to include occurences.
+            elif w in self.highlighted_text_list.keys():
+                repeated_w[w] = 2
+                # First repeat.
+                w = w + str(repeated_w[w])
+                # Rename w to include occurences.
+
+            self.highlighted_text_list[w] = (start, index_pos)
+            # Add word and position bounds to dictionary.
 
     @log.log_function
     def scrollbar(self):
@@ -369,8 +370,8 @@ class TabTextBox(tk.Frame):
             # Highlight all words.
             pos, neg, obj, color = wc.sentiment_all()
 
-            for c, k in zip(color, wc.token):
-                if color != '#ffffff':
+            for c, k in zip(color, list(set(wc.token))):
+                if c != '#ffffff':
                     self.highlight_words(k, wc, color=c, name=k)
                 else:
                     self.highlight_words(k, wc, color=c, char_color='black',

@@ -6,6 +6,7 @@ import re
 import log
 import highlight_dictionary as hd
 import sentiwordnet_dictionary as sd
+from nltk.corpus import wordnet as wn
 from nltk.corpus import sentiwordnet as swn
 
 # Highlighting.
@@ -129,14 +130,11 @@ class WordSet(object):
         Positive and negative sentiment polarity for selected word.
         """
         try:
-            pos_w = nltk.pos_tag([words_in])
-            pos_w = pos_w[0]
-            tag = sd.nltk_to_senti[pos_w[1]]
-            # Convert nltk tag to sentiwordnet tag.
+            s = wn.synsets(words_in)
+            # Create wordnet object.
 
-            word_c = words_in+'.'+tag+'.01'
-
-            s_set = swn.senti_synset(word_c)
+            s_set = swn.senti_synset(s[0].name())
+            # Take first element as most common meaning.
             pos, neg = s_set.pos_score(), s_set.neg_score()
             obj = s_set.obj_score()
 
