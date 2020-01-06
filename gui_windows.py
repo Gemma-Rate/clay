@@ -496,8 +496,7 @@ class MainWindow(tk.Tk):
         """
         Create checkboxes to select the classes of word types to highlight.
         """
-        for var, tg, ps in zip(self.set_to_on, self.toggle_name_full,
-                               self.toggle_pos_full):
+        for var, ps in zip(self.set_to_on, self.toggle_pos_full):
             if var.get() == 1:
                 if ps not in self.toggle_pos:
                     self.toggle_pos.append(ps)

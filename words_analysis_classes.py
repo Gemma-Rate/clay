@@ -5,7 +5,8 @@ import nltk
 import re
 import log
 import highlight_dictionary as hd
-import sentiwordnet_dictionary as sd
+import textblob as tx
+from textblob import TextBlob
 from nltk.corpus import wordnet as wn
 from nltk.corpus import sentiwordnet as swn
 
