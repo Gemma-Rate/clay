@@ -1,12 +1,9 @@
 """
 Classes for analysing prose itself.
 """
-import nltk
-import re
 import log
 import highlight_dictionary as hd
 import textblob as tx
-from textblob import TextBlob
 from nltk.corpus import wordnet as wn
 from nltk.corpus import sentiwordnet as swn
 
@@ -42,30 +39,14 @@ class WordSet(object):
 
     def __init__(self, text, md):
         self.raw = text
-        self.token = self.word_token(text, no_punctuation=None, lower=None)
+        self.blob = tx.TextBlob(text)
+        self.token = self.blob.words
         # Keeps in punctuation and upper cases.
-        self.processed = self.word_token(text)
-        self.sentences = nltk.sent_tokenize(text)
-        self.pos = None
+        self.sentences = self.blob.sentences
+        self.pos = self.blob.tags
+
         self.word_colours = hd.highlight_nltk
         self.md_core = md
-
-
-    def label_word_types(self):
-        """
-        Parameters
-        ----------
-        tagger : function
-            Pos tagger to use.
-
-        Returns
-        ----------
-        """
-
-        pos_text = nltk.pos_tag(self.processed)
-
-        self.pos = pos_text
-
 
     def txt_percent(self):
         """
@@ -79,36 +60,6 @@ class WordSet(object):
         ----------
         """
         pass
-
-    @log.log_function
-    def word_token(self, data, no_punctuation=True, lower=False):
-
-        """
-        Strips out the punctuation and tokenises words in the input string
-        data.
-
-        Parameters
-        -----------
-        data : string
-        String containing data to be tokenised.
-
-        Returns
-        -------
-        datatoken : list
-        List of tokenised data.
-
-        """
-
-        if no_punctuation:
-            data = re.sub(r"[^\w\s]", ' ', data)
-            # Remove punctuation.
-        if lower:
-            datatoken = nltk.word_tokenize(data.lower())
-        else:
-            datatoken = nltk.word_tokenize(data)
-
-        return datatoken
-
 
     @log.log_function
     def spacy_sim(self, s1, s2):

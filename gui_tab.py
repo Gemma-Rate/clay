@@ -132,7 +132,6 @@ class TabTextBox(tk.Frame):
         # Get current text input.
 
         wc = wd.WordSet(self.raw, self.md_core)
-        wc.label_word_types()
         # Label word types.
 
         flatten = [x for y in to_include for x in y]
