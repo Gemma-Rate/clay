@@ -56,7 +56,7 @@ def log_function(fun):
     return wrapper_log_function
 
 
-def profiler(fun):
+def function_profiler(fun):
     """
     Decorator to add time profiling to functions.
 
@@ -82,3 +82,58 @@ def profiler(fun):
 
         return output
     return wrapper_profile_function
+
+
+class CodeBlockTimer(object):
+    """
+    Timer class for small code blocks (as opposed to full functions).
+
+    Public attributes
+    -----------------
+    elapsed : float
+        Elapsed time between timer 'start' and 'stop'.
+    uselogger : Boolean
+        Write timer output to log file.
+    print_sc : Boolean
+        Print to screen.
+    logger : Logger
+        Log object to write to.
+    timer_name : str
+        Descriptive name of timer (used for multiple objects).
+    start : float
+        Start of the timer.
+    stop : float
+        End of the timer.
+
+    Class methods
+    -----------------
+    start
+        Start the timer.
+    finish
+        Stop the timer.
+
+    """
+    def __init__(self, timer_name, uselogger=True, print_sc=True):
+        self.runtime = 0.0
+        self.uselogger = uselogger
+        self.print_sc = print_sc
+        self.logger = logging.getLogger("debug-tracking")
+        self.timer_name = timer_name
+
+        self.begin = None
+        self.end = None
+
+    def start(self):
+        """Start the timer."""
+        self.begin = time.time()
+
+    def finish(self):
+        """Stop the timer."""
+        self.end = time.time()
+        self.runtime = self.end-self.begin
+
+        if self.uselogger:
+            # Write output to file.
+            self.logger.info('Timer {} ran in {}s.'.format(self.timer_name, self.runtime))
+        if self.print_sc:
+            print('Timer {} ran in {}s.'.format(self.timer_name, self.runtime))

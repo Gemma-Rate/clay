@@ -554,5 +554,7 @@ class MainWindow(tk.Tk):
         """
         Perform sentiment analysis on text.
         """
+        self.current_tab.text.delete('1.0', 'end-1c')
+        self.current_tab.text.insert(tk.END, self.current_tab.raw)
 
         self.current_tab.sentiment_analysis()

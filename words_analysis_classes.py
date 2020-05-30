@@ -4,8 +4,7 @@ Classes for analysing prose itself.
 import log
 import highlight_dictionary as hd
 import textblob as tx
-from nltk.corpus import wordnet as wn
-from nltk.corpus import sentiwordnet as swn
+import matplotlib as plt
 
 # Highlighting.
 # Content similarity.
@@ -77,18 +76,25 @@ class WordSet(object):
         return sim, color
 
     @log.log_function
-    def sentiment(self, words_in):
+    def sentiment(self, word_in):
         """
         Positive and negative sentiment polarity for selected word.
         """
         try:
-            s = wn.synsets(words_in)
-            # Create wordnet object.
 
-            s_set = swn.senti_synset(s[0].name())
+            b = tx.TextBlob(word_in)
             # Take first element as most common meaning.
-            pos, neg = s_set.pos_score(), s_set.neg_score()
-            obj = s_set.obj_score()
+            polarity = b.sentiment.polarity
+            obj = b.sentiment.subjectivity
+
+            if polarity>0:
+                pos=polarity
+                neg=obj
+                # Positive polarity - set polarity to green,
+                # objectivity to red and blue.
+            else:
+                pos=obj
+                neg=abs(polarity)
 
             r, g, b = int(255*neg), int(255*pos), int(255*obj)
             color = "#{:02x}{:02x}{:02x}".format(r, g, b)
@@ -99,21 +105,17 @@ class WordSet(object):
 
         return pos, neg, obj, color
 
-    @log.profiler
+    @log.function_profiler
     @log.log_function
     def sentiment_all(self):
         """
-        Positive and negative sentiment polarity for selected word.
+        Positive and negative sentiment polarity for entire text.
         """
-        pos_list, neg_list, obj_list, color_list = [], [], [], []
 
-        for s in self.token:
-            pos, neg, obj, color = self.sentiment(s)
+        self.blob.sentiment
 
-            pos_list.append(pos), neg_list.append(neg)
-            obj_list.append(obj), color_list.append(color)
 
-        return pos_list, neg_list, obj_list, color_list
+        return
 
     @log.log_function
     def wordnet_similar(self, k=9):

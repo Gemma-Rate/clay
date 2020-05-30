@@ -149,6 +149,7 @@ class TabTextBox(tk.Frame):
         # Use the data save in the WordSet class to input the same
         # text, but highlighted.
 
+
     @log.log_function
     def highlight_words(self, keyword, wc, color='blue',
                         char_color= 'snow', name='highlight'):
@@ -176,13 +177,21 @@ class TabTextBox(tk.Frame):
 
         for w in keywords:
             reg_search = r'\y'+w+r'\y'
+            t = log.CodeBlockTimer('tfirst')# This loop ~0.01-0.05s per word! Need to speed up:
+            print('ok')
+            t.start()
             index_pos = self.text.search(reg_search, index_pos, regexp=True,
                                          stopindex='end')
+            t.finish()
             # Search for text keyword as individual word.
             self.colourise_text(w, char_color, color, name, index_pos)
             start, index_pos = self.index_start_and_end(index_pos, w)
             # Set index to begin highlighting at the end of the matched
             # word.
+            print('2')
+
+            t2 = log.CodeBlockTimer('tsec') # code block ok time wise.
+            t2.start()
 
             # Number of occurences of w in keys:
             if w in repeated_w.keys():
@@ -195,6 +204,7 @@ class TabTextBox(tk.Frame):
                 # First repeat.
                 w = w + str(repeated_w[w])
                 # Rename w to include occurences.
+            t2.finish()
 
             self.highlighted_text_list[w] = (start, index_pos)
             # Add word and position bounds to dictionary.
@@ -304,7 +314,7 @@ class TabTextBox(tk.Frame):
 
     @log.log_function
     def bind_to_selection(self):
-        """bind_to_selection
+        """
         Unbind left button press from previous
         binding and rebind it to capture sentences.
         """
@@ -326,6 +336,7 @@ class TabTextBox(tk.Frame):
         self.text_selected = tk.StringVar()
         # Reset selected to empty.
 
+    @log.function_profiler
     @log.log_function
     def similarity_to_all_highlighted(self):
         """
@@ -346,7 +357,6 @@ class TabTextBox(tk.Frame):
             self.colourise_text(s, 'snow', color, s, v[0])
             # Highlight text.
 
-    @log.profiler
     @log.log_function
     def sentiment_analysis(self):
         """
@@ -354,27 +364,30 @@ class TabTextBox(tk.Frame):
         all highlighted words.
         """
 
-        wc = wd.WordSet(self.raw, self.md_core)
-
         if self.highlighted_text_list:
             # Highlight only selected words.
+
+            wc = wd.WordSet(self.raw, self.md_core)
 
             for s, v in zip(self.highlighted_text_list.keys(),
                             self.highlighted_text_list.values()):
 
                 pos, neg, obj, color = wc.sentiment(s)
-                self.colourise_text(s, 'snow', color, s, v[0])
-                # Highlight text.
+
+                if color != '#000000':
+                    self.colourise_text(s, 'snow', color, s, v[0])
+                    # Don't highlight.
+
         else:
             # Highlight all words.
-            pos, neg, obj, color = wc.sentiment_all()
+            wc = wd.WordSet(self.raw, self.md_core)
+            sentiment_all_vals = wc.sentiment_all()
 
-            for c, k in zip(color, list(set(wc.token))):
-                if c != '#ffffff':
-                    self.highlight_words(k, wc, color=c, name=k)
-                else:
-                    self.highlight_words(k, wc, color=c, char_color='black',
-                                         name=k)
+
+    @log.log_function
+    def sentiment_all(self):
+        pass
+
 
 
 
