@@ -7,7 +7,6 @@ import tkinter.ttk
 import tkinter.filedialog
 import log
 import gui_tab as tb
-import spacy as sp
 import gui_tooltip as tp
 
 class MainWindow(tk.Tk):
@@ -26,12 +25,12 @@ class MainWindow(tk.Tk):
 
     """
 
-    def __init__(self, parent):
+    def __init__(self, parent, core):
         tk.Tk.__init__(self, parent)
+
         self.parent = parent
         self.tag_colors = {''}
-        self.md_core = sp.load("en_core_web_md")
-        # Load in the medium sized dataset (may take a moment).
+        self.md_core = core
 
         self.current_tab = None
         self.tab_no = None

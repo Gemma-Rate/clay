@@ -137,6 +137,9 @@ class TabTextBox(tk.Frame):
         flatten = [x for y in to_include for x in y]
         # Get rid of tupples.
 
+        td = log.CodeBlockTimer('tfirst')  # This loop ~0.01-0.05s per word! Need to speed up:
+        td.start()
+
         for w, t in list(set(wc.pos)):
             if t in flatten:
                 try:
@@ -146,6 +149,7 @@ class TabTextBox(tk.Frame):
                     pass
             else:
                 pass
+        td.finish()
         # Use the data save in the WordSet class to input the same
         # text, but highlighted.
 
@@ -170,19 +174,13 @@ class TabTextBox(tk.Frame):
         # Store indices of punctuation marks to delete extra spaces.
         index_pos = '1.0'
 
-        repeated_w = {}
-        #Record words which are repeated.
-
         keywords = [keyword for w in wc.token if keyword == w]
 
         for w in keywords:
             reg_search = r'\y'+w+r'\y'
-            t = log.CodeBlockTimer('tfirst')# This loop ~0.01-0.05s per word! Need to speed up:
-            print('ok')
-            t.start()
+
             index_pos = self.text.search(reg_search, index_pos, regexp=True,
                                          stopindex='end')
-            t.finish()
             # Search for text keyword as individual word.
             self.colourise_text(w, char_color, color, name, index_pos)
             start, index_pos = self.index_start_and_end(index_pos, w)
@@ -190,21 +188,10 @@ class TabTextBox(tk.Frame):
             # word.
             print('2')
 
-            t2 = log.CodeBlockTimer('tsec') # code block ok time wise.
-            t2.start()
-
-            # Number of occurences of w in keys:
-            if w in repeated_w.keys():
-                # Subsequent repeats.
-                repeated_w[w] += 1
-                w = w + str(repeated_w[w])
+            counted = list(self.highlighted_text_list.keys()).count(w)
+            if counted > 1:
+                w = w + str(counted)
                 # Rename w to include occurences.
-            elif w in self.highlighted_text_list.keys():
-                repeated_w[w] = 2
-                # First repeat.
-                w = w + str(repeated_w[w])
-                # Rename w to include occurences.
-            t2.finish()
 
             self.highlighted_text_list[w] = (start, index_pos)
             # Add word and position bounds to dictionary.
